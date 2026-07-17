@@ -16,7 +16,7 @@
 | v1 | Analytic Data Tables | 採択済み |
 | v2 | Row-level Deletes | 採択済み。**現在のデフォルト** |
 | v3 | Extended Types and Capabilities | **採択済み**（1.8.0〜段階的に実装） |
-| v4 | Metadata Structure and Representation | **未採択のドラフト** |
+| v4 | Metadata Structure and Representation | **仕様は未採択**。ただし **Java 実装は 1.10.0+ で `format-version=4` を受理**（PyIceberg は不可）。既定は 2 |
 
 ### バージョニングの原則
 
@@ -341,13 +341,44 @@ bounds のバイト長から書き込み時の型を推論する必要があり�
 
 ---
 
-## v4: Metadata Structure and Representation — 未採択のドラフト
+## v4: Metadata Structure and Representation — 未採択、ただし実装は先行している
 
-### 現況
+### 現況 — 「未採択」と「設定できない」は別物です
 
-**2026年7月時点で `format-version=4` は設定できません。**
+仕様本文は「**Version 4 is under active development and has not been formally adopted.**」と明記しています。**仕様としては未採択です。**
 
-仕様本文が「**Version 4 is under active development and has not been formally adopted.**」と明記しています。
+**しかし、参照実装は既に v4 を受理します。** ここを混同しないでください。
+
+| 実装 | `format-version=4` | 根拠（実測） |
+|---|---|---|
+| **Iceberg Java 1.10.0+**（2025-09-11〜） | **設定できる** | `TableMetadata.java`: `SUPPORTED_TABLE_FORMAT_VERSION = 4`。バリデーションは `formatVersion <= SUPPORTED_TABLE_FORMAT_VERSION` なので v4 は通過する |
+| Iceberg Java 1.9.0 以前 | 設定できない | 同定数が `3` |
+| **PyIceberg 0.11.1** | **設定できない** | `typedef.py`: `TableVersion = Literal[1, 2, 3]`。`metadata.py`: `SUPPORTED_TABLE_FORMAT_VERSION = 2` |
+
+リリースタグごとの実測値:
+
+| タグ | `SUPPORTED_TABLE_FORMAT_VERSION` |
+|---|---|
+| apache-iceberg-1.8.0 | 3 |
+| apache-iceberg-1.9.0 | 3 |
+| **apache-iceberg-1.10.0**（2025-09-11） | **4** |
+| apache-iceberg-1.11.0（2026-05-19） | 4 |
+
+さらに main の `TableMetadata.java` には **v4 機能のゲートがコードとして存在**します:
+
+```java
+static final int DEFAULT_TABLE_FORMAT_VERSION = 2;
+static final int SUPPORTED_TABLE_FORMAT_VERSION = 4;
+static final int MIN_FORMAT_VERSION_ROW_LINEAGE = 3;
+static final int MIN_FORMAT_VERSION_PARQUET_MANIFESTS = 4;   // ← v4 機能
+static final int MIN_FORMAT_VERSION_OPTIONAL_LOCATION = 4;   // ← v4 機能（相対パス）
+```
+
+関連コミット: `Core: Add basic classes for writing table format-version 4 (#13123)`（2025-06-04）、`Core, Parquet: Allow for Writing Parquet/Avro Manifests in V4 (#15634)`（2026-05-22）、`Core: v4 table metadata location should be optional (#16572)`（2026-06-01）。
+
+**正確な言い方**: 「v4 は**仕様として未採択**だが、**Java 実装では 1.10.0 以降 `format-version=4` の設定自体は可能**。ただし仕様が流動的なため本番利用は想定されていない。**既定値は依然として 2**。
+
+> **この区別が重要な理由**: 「未採択だから触れない」と「実装が受け付けない」は違います。前者は**あなたの判断**の問題ですが、後者は**物理的な制約**です。Java では前者しか存在しません。**仕様が固まる前の v4 テーブルを作れてしまう**ということでもあり、それはそれでリスクです。
 
 ### なぜ「公開された」と誤解されやすいか
 
@@ -377,6 +408,8 @@ bounds のバイト長から書き込み時の型を推論する必要があり�
 
 **v4 を前提にした設計判断は時期尚早です。** 公式マイルストーンは2提案のみ、期日なし。ブログ等で語られるタイムライン（2027年前後）は**公式には裏取りできません**。
 
+**ただし「作れないから安全」ではありません。** 上記のとおり Iceberg Java 1.10.0+ は `format-version=4` を受理します。**仕様が採択前に変更されれば、作った v4 テーブルが読めなくなる可能性があります。** 明示的に避ける判断が必要です。
+
 ただし、v4 の方向性は業界動向として重要です。**Databricks が Delta 5.0 に Iceberg v4 の adaptive metadata tree 構造を採用する提案を公式ブログで出しています** → [07-ecosystem.md](07-ecosystem.md)。
 
 ---
@@ -389,7 +422,7 @@ bounds のバイト長から書き込み時の型を推論する必要があり�
 
 3. **row lineage は v3 で必須かつ後付け不可。** アップグレード前のスナップショットには row ID が無く `_row_id` は null。**CDC 目的なら、equality delete を使うエンジン（Flink upsert 等）では追跡されない**点が最大の制約です。
 
-4. **v4 は未採択。** 公式マイルストーンは2提案のみ。v4 前提の計画は時期尚早です。
+4. **v4 は仕様未採択だが、Java 実装は受理する。** 公式マイルストーンは2提案のみ。**Iceberg Java 1.10.0+ で `format-version=4` は設定でき、PyIceberg では設定できません。**「未採択」と「設定不可」を混同しないこと。v4 前提の計画は時期尚早ですが、理由は「作れない」ではなく「**仕様が変わりうる**」です。
 
 5. **File System Tables（HDFS の atomic rename 方式）は使わない。** 仕様が deprecated + 「オブジェクトストアとローカルファイルシステムでは **unsafe**」+ v4 で削除予定と宣言しています。
 

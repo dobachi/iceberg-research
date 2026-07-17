@@ -12,7 +12,7 @@
 
 | プロジェクト | 最新版 | リリース日 | ソース |
 |---|---|---|---|
-| Apache Iceberg | 1.11.0 | 2026-05-20 | GitHub Releases |
+| Apache Iceberg | 1.11.0 | **2026-05-19** | 公式サイト「released on May 19, 2026」/ git tag の tagger date |
 | Delta Lake | 4.3.1 | 2026-07-08 | GitHub Releases |
 | Apache Hudi | 1.2.0 | 2026-05-23 | GitHub Releases |
 | Apache Paimon | 1.4.2 | 2026-06-23/24 | git タグ / ASF dist |
@@ -26,21 +26,31 @@
 
 ### A-2. 健全性シグナル（2026-07-17 実測）
 
-| | Iceberg | Delta Lake | Hudi | Paimon | XTable |
-|---|---|---|---|---|---|
-| コミット（過去90日） | 494 | 346 | 344 | **827** | **10** |
-| コミット（過去365日） | 1,680 | 1,191 | 1,133 | **2,271** | **41** |
-| ユニーク作者（過去365日） | **267** | 139 | 78 | 164 | 17 |
-| Stars | 9,053 | 8,908 | 6,187 | 3,340 | 1,194 |
-| Open issues（PR含む） | 841 | 1,552 | **3,031** | 671 | 162 |
-| 最終 push | 2026-07-16 | 2026-07-16 | 2026-07-16 | 2026-07-16 | 2026-07-14 |
+> **⚠️ 生のコミット数を横並びで比較してはいけません。** ボット比率が **0.4%〜85%** と2桁違います。本節はボット除外値を併記します。この注意を無視すると結論が逆転します（下記）。
+
+| | Iceberg | Delta Lake | Hudi | Paimon | Nessie | Polaris | XTable |
+|---|---|---|---|---|---|---|---|
+| コミット（過去365日、**生**） | 1,696 | 1,203 | 1,141 | **2,278** | 1,652 | 2,100 | 42 |
+| うち**ボット** | 309（18.2%） | 0 | 4（0.4%） | 13（0.6%） | **1,407（85.2%）** | 744（35.4%） | 6 |
+| **人間のコミット** | **1,387** | 1,203 | 1,137 | **2,265** | **245** | 1,356 | 36 |
+| ユニーク作者（過去365日） | **270** | 140 | 78 | 166 | **22** | 106 | 17 |
+| 全期間 contributor | 407 | 391 | 382 | 363 | 79 | 156 | 47 |
+| Stars | 9,054 | 8,911 | 6,188 | 3,340 | — | 2,014 | 1,194 |
+| Open issues（PR含む） | 851 | 1,560 | **3,017** | 677 | — | — | 162 |
+
+ボットの内訳: Iceberg は全て `dependabot[bot]`、Nessie と Polaris は `renovate[bot]`（Nessie はさらにリリース自動化ボットを含む）。
 
 読み取れること（事実として）:
 
-- **Iceberg は contributor 数で突出**（267人、2位 Paimon の1.6倍）。これは「特定ベンダー依存度が相対的に低い」ことの一指標です。ただし**所属組織の分布は未確認**。
-- **Paimon はコミット数で最多**（2,271）。**開発速度は最も速い**。ただし contributor 164人・Stars 3,340 で、**コミット密度が高い＝少数の集中的開発**の可能性。Alibaba 比率などは**未確認**。
-- **Hudi は contributor 78人と最少**（XTable 除く）。Open issues 3,031 は突出。
-- **4主要プロジェクトはいずれも最終 push が 2026-07-16 = どれも死んでいません。**
+- **Paimon の開発速度が最も速い。** 人間コミットで **2,265 vs Iceberg 1,387 = 1.63倍**。生の数字（1.34倍）より**差は大きい**です。Iceberg のコミットの 18% が dependabot であるためです。
+- **Iceberg は直近1年のユニーク作者数で突出**（270人、2位 Paimon 166人の1.63倍）。「特定ベンダー依存度が相対的に低い」ことの一指標です。
+  > **ただしこの結論は指標定義に依存する脆いものです。** **全期間 contributor で測ると Iceberg 407 / Delta 391 / Hudi 382 / Paimon 363 とほぼ横並び（1.12倍）で、「突出」とは言えません。** 「直近1年の活動」を見るか「累積の関与者」を見るかで結論が変わります。所属組織の分布も**未確認**です。
+- **Nessie の「1,652 コミット」は健全性の証拠になりません。** **85.2% が renovate ボットで、人間のコミットは 245 件**。しかも実質1人に集中しています（`snazy` が 212、残り全員で 33）。ユニーク作者は **22人**（Iceberg 270 の 1/12）。リリース頻度が高いのは、依存更新を自動リリースしている構造の反映です。→ [04-catalog-implementations.md](04-catalog-implementations.md#project-nessie--polaris-に統合されて廃止は実現していない)
+- **Polaris の 2,100 も 35% がボット。** 人間換算では **1,356 < Iceberg 1,387** で逆転します。
+- **Hudi は直近1年のユニーク作者 78人と最少**（XTable 除く）。Open issues 3,017 は突出。
+- **主要プロジェクトはいずれも最終 push が測定日近辺 = どれも死んでいません。**
+
+> **方法論上の教訓**: 「コミット数が多い＝活発」は、**ボットを除外しない限り成立しません**。この報告書は初版でその罠を踏み、Nessie を過大評価していました。→ [99-methodology.md](99-methodology.md)
 
 ### A-3. 設計思想の違い
 
@@ -134,7 +144,7 @@ Confluent Tableflow、Fivetran Managed Data Lake Service（**既定で Apache Po
 
 7. **新規参入があります**: **DuckLake v1.0 が 2026-04-13 にリリース**（production-ready 仕様 + DuckDB 拡張、後方互換保証）。**メタデータを全て SQL データベース（SQLite/PostgreSQL/DuckDB）に置く**という、Iceberg と根本的に異なる設計。v1.1 は2026年9月予定。**フォーマット戦争は終結していません。**
 
-8. **Iceberg v4 は未リリース。** **設定できる v4 テーブルは今日存在しません** → [02-table-spec.md](02-table-spec.md#v4-metadata-structure-and-representation--未採択のドラフト)。Iceberg 自身が「バッチ前提のメタデータ設計」という積み残しを抱えたままです。
+8. **Iceberg v4 は仕様として未採択です** → [02-table-spec.md](02-table-spec.md#v4-metadata-structure-and-representation--未採択ただし実装は先行している)。（ただし Java 実装は 1.10.0 以降 `format-version=4` を受理します。「未採択」＝「作れない」ではありません。）Iceberg 自身が「バッチ前提のメタデータ設計」という積み残しを抱えたままです。
 
 ### B-3. 結論
 
@@ -235,7 +245,7 @@ Fabric のネイティブは Delta、Confluent と Fivetran は両対応、Paimo
 
 2. **カタログ選択の方がフォーマット選択より重い可能性があります。** Databricks が UC 必須・外向き IRC 非対応であるなら、**フォーマットが Iceberg でもカタログでロックされます**。Polaris が反対0で TLP 卒業し PMC が分散していることは、中立カタログの選択肢として意味を持ちます → [04-catalog-implementations.md](04-catalog-implementations.md)
 
-3. **2026年後半〜2027年の最大の変数は Iceberg v4 と Delta 5.0 です。** Databricks の統合提案が実現するか、dev ML で分岐するかで絵が変わります。**現時点で v4 前提の設計判断をすべきではありません**（v4 テーブルは存在しません）。
+3. **2026年後半〜2027年の最大の変数は Iceberg v4 と Delta 5.0 です。** Databricks の統合提案が実現するか、dev ML で分岐するかで絵が変わります。**現時点で v4 前提の設計判断をすべきではありません。** ただし理由は「作れないから」ではありません — **Iceberg Java 1.10.0+ は `format-version=4` を受理してしまいます**（[02](02-table-spec.md#v4-metadata-structure-and-representation--未採択ただし実装は先行している)）。**仕様が未採択のまま変わりうる**ことが理由です。作れてしまう分、むしろ注意が必要です。
 
 ---
 
@@ -261,7 +271,7 @@ Fabric のネイティブは Delta、Confluent と Fivetran は両対応、Paimo
 - [Snowflake: Iceberg Summit 2026 Recap — V4 spec (2026-06-04)](https://www.snowflake.com/en/blog/engineering/iceberg-summit-2026-recap-v4-spec/)
 - [Apache XTable Incubator status](https://incubator.apache.org/projects/xtable.html) / [GitHub](https://github.com/apache/incubator-xtable)
 - [Apache Hudi 1.2 release notes](https://hudi.apache.org/releases/release-1.2/)
-- [Apache Paimon Iceberg compatibility](https://paimon.apache.org/docs/master/iceberg/overview/)
+- [Apache Paimon Iceberg compatibility](https://paimon.apache.org/docs/1.4/iceberg/overview/)
 - [AWS S3 Tables](https://aws.amazon.com/s3/features/tables/)
 - [Google Cloud: Iceberg managed tables in BigQuery](https://docs.cloud.google.com/bigquery/docs/biglake-iceberg-tables-in-bigquery)
 - [Microsoft: Use Iceberg tables with OneLake](https://learn.microsoft.com/en-us/fabric/onelake/onelake-iceberg-tables)

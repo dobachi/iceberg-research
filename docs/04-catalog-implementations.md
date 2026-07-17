@@ -10,8 +10,8 @@
 
 | 実装 | OSS/管理 | 言語 | ライセンス | REST 準拠 | 認証 | vending | RBAC/マルチテナント | View | 成熟度 |
 |---|---|---|---|---|---|---|---|---|---|
-| **Apache Polaris** | OSS(+管理版) | Java | Apache-2.0 | 高（IRC の本命） | OAuth2 client_credentials, OIDC | ✅ S3/GCS/Azure | ✅ catalog/principal role の2層 | ✅ | **ASF TLP（2026-02）**、contributor 156、2,083 commits/52週 |
-| **Project Nessie** | OSS | Java | Apache-2.0 | **experimental**、branch は独自 URI 記法 | OIDC/Keycloak, OAuth2 | ✅ signing + assume role | CEL 式ルール | ✅ | contributor 79、1,630 commits/52週。Dremio 主導だが戦略的地位は低下 |
+| **Apache Polaris** | OSS(+管理版) | Java | Apache-2.0 | 高（IRC の本命） | OAuth2 client_credentials, OIDC | ✅ S3/GCS/Azure | ✅ catalog/principal role の2層 | ✅ | **ASF TLP（2026-02）**、contributor 156、年間 2,100 commits（**うち35%はボット、人間 1,356**） |
+| **Project Nessie** | OSS | Java | Apache-2.0 | **experimental**、branch は独自 URI 記法 | OIDC/Keycloak, OAuth2 | ✅ signing + assume role | CEL 式ルール | ✅ | **実質1人保守**（年間の人間コミット245件、うち212が1人。全体の85%はボット）。Dremio 主導だが戦略的地位は低下 |
 | **Lakekeeper** | OSS(+商用) | **Rust** | Apache-2.0 | 高（ただし準拠バージョンの公式明記なし） | OIDC/OAuth2, K8s SA。**Kerberos なし** | ✅ **最も充実**（S3 signing+STS, ADLS SAS, GCS） | ✅ OpenFGA、project→warehouse | ✅ | **v0.13.1 / pre-1.0**、star 1.4k、**実質コア2名**、**公表採用事例なし** |
 | **Apache Gravitino** | OSS | Java | Apache-2.0 | 中（**マルチテーブル tx・view 登録は非対応と明記**） | Simple/Basic/OAuth2/**Kerberos** | ✅ S3/GCS/ADLS/OSS | ✅ Ranger 連携、metalake 階層 | ✅（1.3.0 で logical view） | **TLP（2025-06）**、v1.3.0、star 3.1k、**Uber/Pinterest 採用** |
 | **Unity Catalog OSS** | OSS | Java/Scala | Apache-2.0 | **読み取り専用・UniForm 経由のみ** | OAuth2/OIDC | — | 3層権限 | ❌ | LF AI&Data **sandbox**、v0.5.0、API 不安定と明記 |
@@ -43,27 +43,43 @@
 | 1.3.0-incubating | 2026-01-16 |
 | 1.0.0-incubating | 2025-07-11 |
 
-**健全性の実測**: star 2,012 / fork 485 / **contributor 156** / 直近52週 **2,083 commits** / 最終 push 2026-07-16。開発は非常に活発です。
+**健全性の実測**: star 2,014 / fork 485 / **全期間 contributor 156** / 直近365日 **2,100 commits（うち 744 = 35.4% は renovate ボット。人間は 1,356）** / 直近365日のユニーク作者 106 / 最終 push 2026-07-16。
+
+ボットを除いても人間 1,356 コミット・106人が関与しており、**開発は実際に活発**です（Nessie とは対照的）。
 
 **Generic Table**: 非 Iceberg テーブル（Delta, CSV 等）を扱う **beta** 機能。**Iceberg REST とは別エンドポイント** `/polaris/v1/{prefix}/namespaces/{ns}/generic-tables`。制約が多く、Schema/Partition spec を持たない・コミット調整をしない・**更新不可（drop & recreate）**・**credential vending 非対応**。
 
 > **要検証**: 1.5 で `Polaris-Generic-Table-Access-Delegation` ヘッダによる vending 拡張が入ったとの Snowflake の記述がありますが、公式 docs の「vending 非対応」という制約記述と食い違います。
 
-> **卒業日の食い違い**: [incubator.apache.org のステータスページ](https://incubator.apache.org/projects/polaris.html)は「2026-02-15」、公式ブログ/プレスは「2026-02-19」。理事会決議日と公表日の差と推測されますが**未確定**です。なお同ステータスページは今も卒業を *projected*（予定）扱いのままで、**stale です**。
+> **卒業日は公式ソース3つが3つとも食い違っています**（実測）:
+>
+> | ソース | 日付 |
+> |---|---|
+> | [Polaris 公式ブログ](https://polaris.apache.org/blog/2026/02/19/apache-polaris-graduates-to-top-level-project/) | **2026-02-19** |
+> | [Incubator ステータスページ](https://incubator.apache.org/projects/polaris.html) | **2026-02-15** |
+> | [Incubator プロジェクト一覧](https://incubator.apache.org/projects/) | **2026-02-18** |
+>
+> 後者2つは**同じ incubator.apache.org 内での自己矛盾**です。02-18 が ASF 理事会の議決日、02-19 がプロジェクト側の告知日である可能性が高いと思われますが、**board minutes を確認していないため断定できません**。本報告書は日付を1つに断定せず、食い違いの存在を事実として記します。
+>
+> なおステータスページは「2026-02-15 Graduation as TLP.」と**確定形で記載**しており、*projected*（予定）の但し書きは**ありません**（ページ全文を検索して 0 件）。
 
 ### Project Nessie — 「Polaris に統合されて廃止」は実現していない
 
 **ここが最も誤解されやすい点です。**
 
-2024年の報道（[BigDATAwire](https://www.bigdatawire.com/2024/07/30/polaris-catalog-to-be-merged-with-nessie-now-available-on-github/)、[Dremio newsroom](https://www.dremio.com/newsroom/polaris-catalog-to-be-merged-with-nessie-now-available-on-github/)）は Dremio CMO の「We will treat Polaris as our catalog and we will merge Nessie into Polaris」を引用し、**Nessie は retire される**と伝えました。しかし2026年7月の実測は逆です:
+2024年の報道（[BigDATAwire](https://hpcwire.com/bigdatawire/2024/07/30/polaris-catalog-to-be-merged-with-nessie-now-available-on-github/)、[Dremio newsroom](https://www.dremio.com/newsroom/polaris-catalog-to-be-merged-with-nessie-now-available-on-github/)）は Dremio CMO の「We will treat Polaris as our catalog and we will merge Nessie into Polaris」を引用し、**Nessie は retire される**と伝えました。しかし2026年7月の実測は逆です:
 
-- 最新リリース **0.108.1（2026-06-24）**、直近も 0.107.x 系を継続パッチ
-- 直近52週 **1,630 commits**、**contributor 79名**、最終 push 2026-07-16、**archived: false**
+- 最新リリース **0.108.2（2026-07-17）**、直近も継続パッチ
+- **archived: false**、最終 push は測定日当日
 - Nessie 公式サイトに Polaris への統合・廃止の記載は**一切なし**
+
+> **ただし「活発」という評価語は使えません。** 直近365日のコミット 1,652 のうち **85.2%（1,407件）が renovate ボット**で、**人間のコミットは 245 件**、しかも実質1人に集中しています（`snazy` が 212、残り全員で 33）。ユニーク作者は **22人**（Iceberg 270 の 1/12）。**リリース頻度が高いのは、依存更新を自動リリースしている構造の反映です。** → [07-ecosystem.md](07-ecosystem.md#a-2-健全性シグナル2026-07-17-実測)
 
 Nessie 自身の[公式アナウンス](https://projectnessie.org/blog/2024/08/02/open-source-polaris-announcement/)の表現は retire ではなく「Nessie の機能（カタログレベル versioning、Git-like セマンティクス、マルチテーブルトランザクション）を Polaris に**コントリビュートする意図**」であり、両者は併存前提です。
 
-**結論**: 「統合の噂」は Dremio 側の発言に基づく報道であり、**2026年7月時点で Nessie は独立プロジェクトとして活発に開発継続中**です。ただし Dremio の戦略的重心が Polaris にある以上、長期的な先細りリスクは残ります。
+**結論**: 「統合の噂」は Dremio 側の発言に基づく報道であり、**2026年7月時点で Nessie は独立プロジェクトとして存続しています**（archived ではなく、リリースも継続）。
+
+**しかし「活発」とは言えません。** 人間のコミットは年間 245 件・実質1人であり、**bus factor は 1 に近い**。「retire された」は誤りですが、「健在」と言うのも過大評価です。**正確には「形式的には存続、実質的には少数保守モード」**です。Dremio の戦略的重心が Polaris にある以上、長期的な先細りリスクは現実的です。
 
 **Iceberg REST 対応**（[guides/iceberg-rest](https://projectnessie.org/guides/iceberg-rest/)）: 実装済みですが**公式に「experimental」と明記**されています。エンドポイントは `/iceberg`、ブランチは URI に `{branch}|{warehouse}` 形式で埋め込みます（例 `http://127.0.0.1:19120/iceberg/experiments|sales`）— **これは REST 仕様の標準的な prefix 用法ではない独自拡張**です。S3 request signing と credential vending（assume role）は両方対応。制約: テーブルの base location は Nessie が強制し、変更は無視されます。
 
@@ -94,7 +110,7 @@ Hudi/Delta/Iceberg 間の**メタデータ変換層**です。CoW/read-optimized
 
 **実測で明確に停滞**しています:
 - 最新リリース **0.3.0-incubating = 2025-06-04**（**13ヶ月以上リリースなし**）
-- コミット: 直近90日 **10件** / 365日 **41件**（Iceberg は 1,680件）
+- コミット: 直近90日 **11件** / 365日 **42件**（うち6件はボット。人間は36件。Iceberg は人間 1,387件）
 - Incubation 入りは 2024-02-11、**2026年7月時点でまだ incubating**（約2年5ヶ月）
 
 ベンダー中立の相互運用を担う唯一のプロジェクトがこの状態である点は、ロックインの観点でリスクとして認識すべきです → [07-ecosystem.md](07-ecosystem.md)
@@ -281,7 +297,7 @@ TLP ガバナンス、contributor 156名、catalog role / principal role の2層
 
 - [Polaris TLP 卒業ブログ（2026-02-19）](https://polaris.apache.org/blog/2026/02/19/apache-polaris-graduates-to-top-level-project/) · [ASF news](https://news.apache.org/foundation/entry/the-apache-software-foundation-graduates-two-open-source-projects-from-incubator) · [Incubator status](https://incubator.apache.org/projects/polaris.html)
 - [Polaris quickstart compose](https://github.com/apache/polaris/blob/main/site/content/guides/quickstart/docker-compose.yml) · [Generic Table](https://polaris.apache.org/in-dev/unreleased/generic-table/) · [obtain-token.sh](https://raw.githubusercontent.com/apache/polaris/main/site/content/guides/assets/polaris/obtain-token.sh)
-- [Nessie Iceberg REST guide](https://projectnessie.org/guides/iceberg-rest/) · [Nessie/Polaris 公式見解](https://projectnessie.org/blog/2024/08/02/open-source-polaris-announcement/) · [BigDATAwire（retire 報道）](https://www.bigdatawire.com/2024/07/30/polaris-catalog-to-be-merged-with-nessie-now-available-on-github/)
+- [Nessie Iceberg REST guide](https://projectnessie.org/guides/iceberg-rest/) · [Nessie/Polaris 公式見解](https://projectnessie.org/blog/2024/08/02/open-source-polaris-announcement/) · [BigDATAwire（retire 報道）](https://hpcwire.com/bigdatawire/2024/07/30/polaris-catalog-to-be-merged-with-nessie-now-available-on-github/)
 - [Lakekeeper compose](https://github.com/lakekeeper/lakekeeper/blob/main/examples/minimal/docker-compose.yaml) · [Lakekeeper storage docs](https://docs.lakekeeper.io/docs/nightly/storage/)
 - [Gravitino TLP](https://gravitino.apache.org/blog/gravitino-top-level-project/) · [Gravitino Iceberg REST](https://github.com/apache/gravitino/blob/main/docs/iceberg-rest-service.md) · [gravitino-playground](https://github.com/apache/gravitino-playground)
 - [UC UniForm](https://docs.unitycatalog.io/usage/tables/uniform/) · [Databricks Iceberg 外部アクセス](https://docs.databricks.com/aws/en/external-access/iceberg)

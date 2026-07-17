@@ -29,7 +29,7 @@ Apache Iceberg と Iceberg REST Catalog について、**一次情報の裏取�
 
 ### 仕様
 
-- **v4 は公開されていません。** 2026年7月時点で `format-version=4` は設定できません。仕様書には v4 の節が既に存在し、Iceberg Summit 2026 でも大きく扱われたため誤解されやすいのですが、仕様本文が「Version 4 is under active development and **has not been formally adopted**」と明記しています。→ [02](docs/02-table-spec.md#v4-metadata-structure-and-representation--未採択のドラフト)
+- **v4 は仕様として未採択ですが、Java 実装は既に受理します。** ここは混同されやすい上に、混同すると判断を誤ります。仕様本文は「Version 4 is under active development and **has not been formally adopted**」と明記していますが、**Iceberg Java は 1.10.0（2025-09-11）以降 `format-version=4` を設定できます**（`SUPPORTED_TABLE_FORMAT_VERSION = 4`）。**PyIceberg 0.11.1 は受理しません**（`TableVersion = Literal[1, 2, 3]`）。既定値はいずれも 2。→ [02](docs/02-table-spec.md#v4-metadata-structure-and-representation--未採択ただし実装は先行している)
 
 - **デフォルトは今も v2 + copy-on-write。** `format-version` の既定値は 2、`write.{delete,update,merge}.mode` の既定値は `copy-on-write` です。v3 の恩恵（deletion vector 等）は明示的なオプトインなしには得られません。→ [02](docs/02-table-spec.md)
 

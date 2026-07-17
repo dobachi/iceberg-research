@@ -439,7 +439,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 
 **これは極めて重大です。** Iceberg のベストプラクティスに従って `history.expire.*` を設定する、あるいはリリースタグを打つといった**ごく自然な運用が、自動メンテナンスをサイレントに全面停止させます。** しかも失敗は**ストレージ課金の増加としてしか現れません**。
 
-→ **`GetTableMaintenanceJobStatus` API による能動的な監視が必須**です（失敗時は `FAILED` ステータスと原因メッセージが返ります）。CloudTrail でも追跡可能です。
+→ **[`GetTableMaintenanceJobStatus`](https://docs.aws.amazon.com/AmazonS3/latest/API/API_s3Buckets_GetTableMaintenanceJobStatus.html) API による能動的な監視が必須**です（失敗時は `FAILED` ステータスと原因メッセージが返ります）。CloudTrail でも追跡可能です。
 
 #### その他の制約
 
@@ -494,7 +494,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 **AWS**
 - [Maintenance for tables (S3 Tables)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-tables-maintenance.html)
 - [Considerations and limitations](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-tables-considerations.html)
-- [PutTableMaintenanceConfiguration API](https://docs.aws.amazon.com/AmazonS3/latest/API/API_s3tables_PutTableMaintenanceConfiguration.html)
+- [PutTableMaintenanceConfiguration API](https://docs.aws.amazon.com/AmazonS3/latest/API/API_s3Buckets_PutTableMaintenanceConfiguration.html)
 
 **Databricks**
 - [Predictive optimization](https://docs.databricks.com/aws/en/optimizations/predictive-optimization)
