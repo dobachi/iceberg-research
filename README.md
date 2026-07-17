@@ -1,0 +1,82 @@
+# Apache Iceberg 調査報告書
+
+Apache Iceberg と Iceberg REST Catalog について、**一次情報の裏取りを前提に**まとめた技術調査報告書です。実務での採用判断に使えることを目標にしています。
+
+**調査基準日: 2026年7月17日** / **対象: Apache Iceberg 1.11.0（2026-05-19 リリース）**
+
+動作するサンプル実装は別リポジトリ [`iceberg-rest-lab`](../iceberg-rest-lab) にあります。本報告書の主張の一部は、そちらで実際に検証できます。
+
+---
+
+## 目次
+
+| # | ドキュメント | 内容 |
+|---|---|---|
+| 01 | [アーキテクチャと中核概念](docs/01-architecture.md) | 三層メタデータ構造、スナップショット、楽観的並行制御、クエリプランニング |
+| 02 | [テーブル仕様 v1/v2/v3](docs/02-table-spec.md) | 各バージョンの差分、スキーマ/パーティション進化、CoW/MoR、deletion vector、row lineage、**v4 の現況** |
+| 03 | [REST Catalog 仕様](docs/03-rest-catalog.md) | エンドポイント、コミットプロトコル、認証、credential vending、server-side scan planning |
+| 04 | [カタログ実装の比較](docs/04-catalog-implementations.md) | Polaris / Nessie / Lakekeeper / Gravitino / Glue / S3 Tables / Unity Catalog ほか、選定指針 |
+| 05 | [エンジン対応状況](docs/05-engine-support.md) | Spark / Flink / Trino / Presto / Snowflake / Databricks / Dremio ほかの対応マトリクス |
+| 06 | [運用・メンテナンス・性能](docs/06-operations.md) | 必須メンテナンス、テーブルプロパティ、アンチパターン、性能劣化の機序 |
+| 07 | [エコシステムと業界動向](docs/07-ecosystem.md) | Delta / Hudi / Paimon 比較、「標準になったのか」の検証、**使うべきでない場面** |
+| 99 | [調査方法論と未確認事項](docs/99-methodology.md) | 証跡の扱い方、踏んだ罠、未確認事項の一覧 |
+
+---
+
+## 先に知っておくと良い結論
+
+報告書全体から、実務判断に効く事実を抜き出したものです。詳細は各ドキュメントを参照してください。
+
+### 仕様
+
+- **v4 は公開されていません。** 2026年7月時点で `format-version=4` は設定できません。仕様書には v4 の節が既に存在し、Iceberg Summit 2026 でも大きく扱われたため誤解されやすいのですが、仕様本文が「Version 4 is under active development and **has not been formally adopted**」と明記しています。→ [02](docs/02-table-spec.md#v4-metadata-structure-and-representation--未採択のドラフト)
+
+- **デフォルトは今も v2 + copy-on-write。** `format-version` の既定値は 2、`write.{delete,update,merge}.mode` の既定値は `copy-on-write` です。v3 の恩恵（deletion vector 等）は明示的なオプトインなしには得られません。→ [02](docs/02-table-spec.md)
+
+- **v3 の「GA」は Apache の宣言ではありません。** Apache 側の公式ステータスは「complete and adopted by the community」までで、「GA」はベンダー用語です。→ [02](docs/02-table-spec.md#v3-の策定リリース状況)
+
+### エンジン
+
+- **v3 対応はベンダーごとにバラバラです。** Snowflake GA（2026-05-07）、Databricks GA（2026-05-28）、**Dremio は今も Preview**。Trino は**公式 docs 上まだ experimental**（PR はマージ済みだが「マージ済み ≠ リリース済み ≠ サポート対象」）。→ [05](docs/05-engine-support.md)
+
+- **PyIceberg は v3 テーブルを書けません。** 読めますが書けません。equality delete は**読むこともできません**。merge-on-read を指定しても警告を出して copy-on-write に落ちます。→ [05](docs/05-engine-support.md#pyiceberg)
+
+### 運用
+
+- **公式は compaction を "Optional"、`expire_snapshots` と metadata 掃除を "Recommended" に分類しています。** 一般的な認識と逆です。しかも **`expire_snapshots` を回さない限り compaction は容量を一切解放しません**（むしろ増えます）。→ [06](docs/06-operations.md#公式の分類-recommended-と-optional)
+
+- **`write.metadata.delete-after-commit.enabled` はテーブル作成時に決めるべき設定です。** 既定は false で、`previous-versions-max`（既定100）を溢れた metadata JSON は追跡対象から外れ、**後から有効化しても救済できません**。→ [06](docs/06-operations.md#5-メタデータ-json-肥大)
+
+- **S3 Tables はタグやブランチを1つ作るだけで自動スナップショット管理がテーブル全体で停止します**（fail-closed）。`history.expire.*` の設定でも同様。しかも失敗は課金増加としてしか現れません。→ [06](docs/06-operations.md#c-1-amazon-s3-tables)
+
+### エコシステム
+
+- **「Iceberg がデファクト標準になった」は不正確です。** カタログの相互接続層としては REST Catalog 仕様が共通語になりつつある一方、フォーマット単体では決着していません（Fabric のネイティブは Delta、Confluent/Fivetran は両対応、Paimon の開発速度は Iceberg の1.35倍、DuckLake v1.0 が2026年4月に登場）。→ [07](docs/07-ecosystem.md#b-iceberg-は事実上の標準になったのか)
+
+- **Databricks が Delta 5.0 に Iceberg v4 のメタデータ構造を採用する提案を出しています。** 実現すれば「勝敗」ではなく統合になります。ただし Delta 5.0 も Iceberg v4 も未リリースです。→ [07](docs/07-ecosystem.md)
+
+---
+
+## 本報告書の証跡方針
+
+この報告書は複数の調査エージェントによる並列調査をもとに構成し、**エージェント間で食い違った主張は専任の検証を行って一次情報で決着させています**。方針は以下の通りです。
+
+1. **一次情報を直接取得して確認する。** 記憶や推測でバージョン番号・プロパティ名・API シグネチャを書きません。
+2. **優先順位を固定する。** 公式ドキュメント > リポジトリの実ファイル/ソースコード > 公式ブログ・プレスリリース > 技術ブログ。矛盾したら上位を採用し、**矛盾の存在自体を記録します**。
+3. **「未確認」と「非対応」を区別する。** 「ソースが見つからなかった」と「公式が非対応と明記している」は全く別の事実です。本文中でも区別しています。
+4. **「マージ済み ≠ リリース済み ≠ サポート対象」を区別する。**
+5. **出典 URL を付ける。** 日付が判明するものは日付も添えます。
+
+調査中に判明した具体的な罠（リリースノートは遡及更新されない、プレスリリースと docs が食い違う、など）は [99-methodology.md](docs/99-methodology.md) に方法論としてまとめています。**この報告書を更新する人、および同種の調査を行う人はそちらを先に読むことを勧めます。**
+
+### 既知の限界
+
+- **調査基準日時点のスナップショットです。** Iceberg 周辺は変化が速く、特にベンダーの対応状況は数ヶ月で変わります。バージョン番号や GA/Preview の別を引用する際は再確認してください。
+- **実機検証は限定的です。** 大半はドキュメントとソースコードの読解に基づきます。実際に動かして確認した範囲は [`iceberg-rest-lab`](../iceberg-rest-lab) に限られます。
+- **未確認事項が残っています。** 隠さず [99-methodology.md](docs/99-methodology.md#未確認事項の一覧) に一覧化しています。
+
+---
+
+## ライセンス
+
+本報告書は [CC BY 4.0](LICENSE) で提供します。引用元の各プロジェクト・製品のドキュメントの権利は、それぞれの権利者に帰属します。
