@@ -48,7 +48,11 @@ info:
 
 ## 2. エンドポイント一覧（全35オペレーション）
 
+IRC の API は、大きく **リソース階層（namespace の中に table と view がある）への CRUD** と、それを支える **横断的な操作群**（設定取得・認証・トランザクション・スキャンプランニング・認証情報の払い出し）でできています。namespace / table / view はどれも **list（一覧）・create（作成）・load（読み込み）・update（更新）・drop（削除）・exists（存在確認）** という同じ形をしているので、1つ分かれば残りも読めます。以下、グループごとに見ていきます。
+
 ### Configuration
+
+クライアントが**最初に叩くべき**エンドポイントです。サーバの設定と対応機能（ケイパビリティ）を受け取ります（詳細は [§6](#6-get-v1config--ケイパビリティネゴシエーション)）。
 
 | パス | メソッド | operationId | 用途 |
 |---|---|---|---|
@@ -56,11 +60,15 @@ info:
 
 ### OAuth2（非推奨）
 
+トークン取得用ですが、セキュリティ上の理由で**非推奨・削除予定**です。本番では外部の IdP を使います（[§4](#4-認証)）。
+
 | パス | メソッド | operationId | 用途 |
 |---|---|---|---|
 | `/v1/oauth/tokens` | POST | `getToken` | **DEPRECATED for REMOVAL**（`deprecated: true`）→ [§4](#4-認証) |
 
 ### Namespace
+
+テーブルや view をまとめる入れ物（データベースのスキーマに相当）を操作します。
 
 | パス | メソッド | operationId |
 |---|---|---|
@@ -79,6 +87,8 @@ info:
 
 ### Table
 
+テーブルの CRUD です。中でも `updateTable` が**唯一の書き込み経路**で、追記も削除もコミットはすべてここを通ります（[§3](#3-コミットプロトコル)）。
+
 | パス | メソッド | operationId | 用途 |
 |---|---|---|---|
 | `/v1/{prefix}/namespaces/{namespace}/tables` | GET | `listTables` | |
@@ -94,6 +104,8 @@ info:
 
 ### View
 
+SQL の view を操作します。テーブルと同じ CRUD の形です。
+
 | パス | メソッド | operationId |
 |---|---|---|
 | `/v1/{prefix}/namespaces/{namespace}/views` | GET / POST | `listViews` / `createView` |
@@ -102,6 +114,8 @@ info:
 | `/v1/{prefix}/namespaces/{namespace}/register-view` | POST | `registerView`（**1.11.0 で実装**、PR #14870） |
 
 ### Function（新しい領域）
+
+SQL の関数（UDF）を扱う新しい領域です。今のところ read 系（一覧・読み込み）のみ。
 
 | パス | メソッド | operationId |
 |---|---|---|
@@ -112,11 +126,15 @@ info:
 
 ### Transaction
 
+複数のテーブルへの変更を、**1つの単位でまとめてコミット**します。
+
 | パス | メソッド | operationId | 用途 |
 |---|---|---|---|
 | `/v1/{prefix}/transactions/commit` | POST | `commitTransaction` | **複数テーブルのアトミックコミット**。`CommitTransactionRequest { table-changes: [CommitTableRequest] }` |
 
 ### Scan Planning
+
+「どのファイルを読むか」の計画をサーバ側で行う仕組みです（[§7](#7-サーバサイド-scan-planning)）。
 
 | パス | メソッド | operationId |
 |---|---|---|
@@ -129,6 +147,8 @@ info:
 
 ### Credentials / Remote Signing
 
+ストレージへアクセスするための**短命の認証情報を払い出す/署名する**エンドポイントです（[§5](#5-credential-vending--remote-signing)）。
+
 | パス | メソッド | operationId |
 |---|---|---|
 | `/v1/{prefix}/namespaces/{namespace}/tables/{table}/credentials` | GET | `loadCredentials`（`?planId=`, `?referenced-by=`） |
@@ -137,6 +157,8 @@ info:
 → [§5](#5-credential-vending--remote-signing)
 
 ### 横断パラメータ
+
+特定のグループに属さず、多くのエンドポイントで共通して使うパラメータです。
 
 | パラメータ | 位置 | 内容 |
 |---|---|---|
