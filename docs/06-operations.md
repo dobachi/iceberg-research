@@ -35,7 +35,7 @@
 
 | 引数 | 必須 | 型 | 説明 |
 |---|---|---|---|
-| `table` | ✔ | string | |
+| `table` | 必須 | string | |
 | `strategy` | | string | `binpack` または `sort`。**デフォルトは binpack** |
 | `sort_order` | | string | Zorder は `zorder(c1,c2,c3)` 形式。それ以外は `(ColumnName SortDirection NullOrder)` のカンマ区切り |
 | `options` | | map<string,string> | |
@@ -85,7 +85,7 @@
 
 | 引数 | 必須 | 型 | 説明 |
 |---|---|---|---|
-| `table` | ✔ | string | |
+| `table` | 必須 | string | |
 | `use_caching` | | boolean | **既定 false**。有効化すると executor のメモリ使用量が増える |
 | `spec_id` | | int | |
 | `sort_by` | | array<string> | **頻繁にクエリされる transform を選ぶと不要な manifest をスキップして planning 時間を削減できる** |
@@ -102,7 +102,7 @@
 
 | 引数 | 必須 | 型 | デフォルト |
 |---|---|---|---|
-| `table` | ✔ | string | |
+| `table` | 必須 | string | |
 | `older_than` | | timestamp | **5日前** |
 | `retain_last` | | int | **1** |
 | `max_concurrent_deletes` | | int | **デフォルトではスレッドプールを使わない** |

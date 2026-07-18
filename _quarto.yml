@@ -58,7 +58,7 @@ website:
             href: fact-check-report.md
 
   page-footer:
-    left: "CC BY 4.0 / 調査基準日 2026-07-17"
+    left: "CC BY 4.0 / 調査基準日 2026-07-17 / 版: 2026-07-18"
     right:
       - text: "GitHub"
         href: https://github.com/dobachi/iceberg-research
