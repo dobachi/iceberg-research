@@ -19,6 +19,8 @@ website:
     background: primary
     search: true
     right:
+      - text: "実験ラボ"
+        href: https://dobachi.github.io/iceberg-rest-lab/
       - icon: github
         href: https://github.com/dobachi/iceberg-research
         aria-label: GitHub

@@ -23,7 +23,7 @@ Apache Iceberg と Iceberg REST Catalog について、**一次情報の裏取�
 
 > Version はこのページを更新した日付、調査基準日は内容を調べた時点です。Iceberg 周辺は変化が速いため、**調査基準日から離れるほど内容は古くなります**。
 
-本報告書の主張の一部は、Apache Polaris と PyIceberg を用いた実環境で検証しています（検証環境のリポジトリは非公開）。
+本報告書の主張の一部は、Apache Polaris と PyIceberg を用いた実環境で検証しています。検証環境と実験の記録は姉妹リポジトリ [**Iceberg REST Lab**](https://dobachi.github.io/iceberg-rest-lab/) に公開しています。
 
 ---
 
