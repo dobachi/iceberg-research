@@ -19,6 +19,7 @@ Apache Iceberg と Iceberg REST Catalog について、**一次情報の裏取�
 | 05 | [エンジン対応状況](docs/05-engine-support.md) | Spark / Flink / Trino / Presto / Snowflake / Databricks / Dremio ほかの対応マトリクス |
 | 06 | [運用・メンテナンス・性能](docs/06-operations.md) | 必須メンテナンス、テーブルプロパティ、アンチパターン、性能劣化の機序 |
 | 07 | [エコシステムと業界動向](docs/07-ecosystem.md) | Delta / Hudi / Paimon 比較、「標準になったのか」の検証、**使うべきでない場面** |
+| 08 | [選定ガイド](docs/08-decision-guide.md) | **要求から技術選択への決定チャート**（フォーマット→カタログ→エンジンの3段階） |
 | 99 | [調査方法論と未確認事項](docs/99-methodology.md) | 証跡の扱い方、踏んだ罠、未確認事項の一覧 |
 
 ---
