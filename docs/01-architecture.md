@@ -333,12 +333,23 @@ flowchart LR
 
 ## branch / tag と WAP
 
-snapshot reference は `snapshot-id` / `type`（`tag` | `branch`）/ `min-snapshots-to-keep`（branch のみ）/ `max-snapshot-age-ms`（branch のみ）/ `max-ref-age-ms` を持ちます。
+**branch（ブランチ）** と **tag（タグ）** は、どちらも「あるスナップショットを指す、名前つきのしおり」です。git のブランチ・タグと同じ発想で、用語もそこから借りています。
+
+- **tag**: 特定のスナップショットに貼る**動かない名札**です。「月末時点の状態」に `EOM-2026-07` というタグを付けておけば、その後どれだけ書き込んでも、そのタグはずっと同じ状態を指し続けます。監査や、あとで参照したい状態の保存に使います。
+- **branch**: **本流（`main`）とは別に書き込める枝**です。`main` を汚さずに枝の上で変更を積み、問題なければ後で `main` に取り込みます。
+
+この「別の枝で作業して、良ければ本流に取り込む」流れを、データの品質検証に応用したのが後述の WAP です。
+
+内部的には、branch と tag（まとめて **snapshot reference** と呼びます）は次の情報を持ちます: `snapshot-id` / `type`（`tag` | `branch`）/ `min-snapshots-to-keep`（branch のみ）/ `max-snapshot-age-ms`（branch のみ）/ `max-ref-age-ms`。
 
 - 「There is always a `main` branch reference pointing to the `current-snapshot-id` even if the `refs` map is null.」
 - **「The `main` branch never expires.」**
 
+つまり `main` という branch は常に存在し（`refs` が空でも暗黙にある）、期限切れで消えることはありません。
+
 ### スナップショット保持ポリシーのアルゴリズム
+
+要点は「**どこかの branch / tag から参照されているスナップショットは expire（期限切れ削除）されない**」です。以下はその具体化です。
 
 1. 保持集合を空で開始
 2. main 以外の ref で、参照先が `max-ref-age-ms` より古いものを削除
@@ -349,6 +360,12 @@ snapshot reference は `snapshot-id` / `type`（`tag` | `branch`）/ `min-snapsh
 > **運用上の罠**: タグを1つ付けただけで、そのタグが参照するスナップショットとその依存ファイルは無期限に残ります。Amazon S3 Tables ではこれがさらに深刻な挙動（テーブル全体で自動メンテナンスが停止）になります → [06](06-operations.md#c-1-amazon-s3-tables)
 
 ### Write-Audit-Publish（WAP）
+
+**WAP** は Write（書く）→ Audit（検証する）→ Publish（公開する）の略で、**「検証してから公開する」ための仕組み**です。
+
+ふつうにテーブルへ書き込むと、その結果はすぐに全員から見えてしまいます。もし壊れたデータを書けば、そのまま下流のクエリに流れます。WAP はこれを避けます — **まず監査用のブランチに書き込み、そのブランチの上でデータ品質チェックを行い、問題なければ `main` に取り込んで（publish）はじめて全員に見えるようにする**、という段取りです。バッチごとに「ステージング → 検証 → 本番反映」のゲートを設けるイメージです。
+
+下は Spark での典型的な流れです。
 
 ```sql
 -- 1. WAP を有効化
@@ -368,6 +385,8 @@ snapshot summary の WAP 関連フィールド: `wap.id`（ステージされた
 > **重要な制約**: 「**the schema tracked for a table is valid across all branches**」— **スキーマはブランチ間で共有されます。** ブランチごとに独立したスキーマは持てません。
 
 ### rollback 系プロシージャ
+
+過去のスナップショットを操作するための代表的なプロシージャです（いずれも Spark の例）。
 
 | プロシージャ | 用途 |
 |---|---|
