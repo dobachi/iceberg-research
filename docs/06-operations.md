@@ -35,7 +35,7 @@
 
 | 引数 | 必須 | 型 | 説明 |
 |---|---|---|---|
-| `table` | ✔️ | string | |
+| `table` | ✔ | string | |
 | `strategy` | | string | `binpack` または `sort`。**デフォルトは binpack** |
 | `sort_order` | | string | Zorder は `zorder(c1,c2,c3)` 形式。それ以外は `(ColumnName SortDirection NullOrder)` のカンマ区切り |
 | `options` | | map<string,string> | |
@@ -85,7 +85,7 @@
 
 | 引数 | 必須 | 型 | 説明 |
 |---|---|---|---|
-| `table` | ✔️ | string | |
+| `table` | ✔ | string | |
 | `use_caching` | | boolean | **既定 false**。有効化すると executor のメモリ使用量が増える |
 | `spec_id` | | int | |
 | `sort_by` | | array<string> | **頻繁にクエリされる transform を選ぶと不要な manifest をスキップして planning 時間を削減できる** |
@@ -102,7 +102,7 @@
 
 | 引数 | 必須 | 型 | デフォルト |
 |---|---|---|---|
-| `table` | ✔️ | string | |
+| `table` | ✔ | string | |
 | `older_than` | | timestamp | **5日前** |
 | `retain_last` | | int | **1** |
 | `max_concurrent_deletes` | | int | **デフォルトではスレッドプールを使わない** |
@@ -114,7 +114,7 @@
 >
 > → **タグを1つ付けただけで、そのスナップショットと依存ファイルが無期限に残ります。** Amazon S3 Tables ではこれがさらに深刻な挙動になります（[C-1](#c-1-amazon-s3-tables)）。
 
-### A-4. `remove_orphan_files` ⚠️ 最も危険な操作
+### A-4. `remove_orphan_files` ※ 最も危険な操作
 
 **なぜ必要か**: 「Spark やその他の分散処理エンジンでは、**タスクやジョブの失敗によりテーブルメタデータから参照されないファイルが残る**ことがあり、また通常のスナップショット期限切れではファイルが不要と判断できず削除できない場合がある」
 
@@ -428,7 +428,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 
 「compaction はオブジェクトを結合する際、**テーブルの行レベル delete の効果も適用する**」
 
-#### ⚠️ 最重要の落とし穴: Snapshot management が fail-closed する
+#### ※ 最重要の落とし穴: Snapshot management が fail-closed する
 
 公式逐語:
 

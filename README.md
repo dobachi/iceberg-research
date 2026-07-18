@@ -77,23 +77,23 @@ Apache Iceberg と Iceberg REST Catalog について、**一次情報の裏取�
 
 | 主張 | 検証結果 |
 |---|---|
-| 新規テーブルの既定は format-version=2 | ✅ 実測で 2 |
-| `write.delete.mode` の既定は copy-on-write | ✅ 実測で copy-on-write |
-| PyIceberg は V3 を書けない | ✅ `NotImplementedError` を確認 |
-| MoR 指定は警告を出して CoW に落ちる | ✅ `Merge on read is not yet supported, falling back to copy-on-write` を捕捉 |
-| `MaintenanceTable` は `expire_snapshots` のみ | ✅ compaction / orphan 削除の不在を確認 |
-| `s3.path-style-access` は PyIceberg に存在しない | ✅ 定数の不在を確認 |
-| rename しても field ID は変わらない | ✅ 実測で一致 |
-| credential vending の prefix スコープ | ✅ テーブル単位の短命資格情報が払い出されることを確認 |
-| 409 CommitFailedException とそのメッセージ | ✅ 意図的に再現 |
-| サーバが `overrides` で `prefix` を配る | ✅ `prefix = lab_catalog` を確認 |
-| `namespace-separator` の既定は `0x1F` | ✅ `%1F` を確認 |
+| 新規テーブルの既定は format-version=2 | ○ 実測で 2 |
+| `write.delete.mode` の既定は copy-on-write | ○ 実測で copy-on-write |
+| PyIceberg は V3 を書けない | ○ `NotImplementedError` を確認 |
+| MoR 指定は警告を出して CoW に落ちる | ○ `Merge on read is not yet supported, falling back to copy-on-write` を捕捉 |
+| `MaintenanceTable` は `expire_snapshots` のみ | ○ compaction / orphan 削除の不在を確認 |
+| `s3.path-style-access` は PyIceberg に存在しない | ○ 定数の不在を確認 |
+| rename しても field ID は変わらない | ○ 実測で一致 |
+| credential vending の prefix スコープ | ○ テーブル単位の短命資格情報が払い出されることを確認 |
+| 409 CommitFailedException とそのメッセージ | ○ 意図的に再現 |
+| サーバが `overrides` で `prefix` を配る | ○ `prefix = lab_catalog` を確認 |
+| `namespace-separator` の既定は `0x1F` | ○ `%1F` を確認 |
 
 ### 既知の限界
 
 - **調査基準日時点のスナップショットです。** Iceberg 周辺は変化が速く、特にベンダーの対応状況は数ヶ月で変わります。バージョン番号や GA/Preview の別を引用する際は再確認してください。
 - **実機検証は上記の範囲に限られます。** それ以外はドキュメントとソースコードの読解に基づきます。特に **Spark / Flink / Trino / Snowflake / Databricks / Dremio の対応状況は未検証**で、各社のドキュメントの読解に依拠しています。
-- **未確認事項が残っています。** 隠さず [99-methodology.md](docs/99-methodology.md#未確認事項の一覧) に一覧化しています。
+- **未確認事項が残っています。** 隠さず [99-methodology.md](docs/99-methodology.md#d-未確認事項の一覧) に一覧化しています。
 
 ---
 

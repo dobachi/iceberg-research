@@ -357,22 +357,22 @@ def upsert(self, df, join_cols=None, when_matched_update_all=True,
 
 | 操作 | 可否 |
 |---|---|
-| `create_namespace` / `drop_namespace` / `list_namespaces` / `namespace_exists` | ✅ |
-| `create_table` / `create_table_if_not_exists` / `create_table_transaction` | ✅ |
-| `register_table` / `load_table` / `table_exists` / `rename_table` / `drop_table` / `purge_table` | ✅ |
-| `append`（既定 fast append） | ✅ |
-| `overwrite`（`overwrite_filter` 可） / `dynamic_partition_overwrite` | ✅ |
-| `delete`（`delete_filter`） | ✅（**CoW のみ**） |
-| `upsert` | ✅ |
-| `add_files`（`check_duplicate_files=True` 既定） | ✅ |
-| `update_schema`（add/rename/update/delete/move/union_by_name） | ✅ |
-| **パーティション進化** `update_spec` | ✅ |
-| `update_sort_order` | ✅（0.11.0〜） |
-| `manage_snapshots`（create/remove tag・branch） | ✅ |
-| タイムトラベル、ロールバック | ✅ |
-| `scan` → `to_arrow` / `to_pandas` / `to_duckdb` / `to_polars` / `to_ray` / `to_daft` / `to_bodo` | ✅ |
-| `inspect.*`（snapshots/partitions/entries/refs/manifests/history/files/…） | ✅ |
-| `table.maintenance.expire_snapshots()` | ✅ |
+| `create_namespace` / `drop_namespace` / `list_namespaces` / `namespace_exists` | ○ |
+| `create_table` / `create_table_if_not_exists` / `create_table_transaction` | ○ |
+| `register_table` / `load_table` / `table_exists` / `rename_table` / `drop_table` / `purge_table` | ○ |
+| `append`（既定 fast append） | ○ |
+| `overwrite`（`overwrite_filter` 可） / `dynamic_partition_overwrite` | ○ |
+| `delete`（`delete_filter`） | ○（**CoW のみ**） |
+| `upsert` | ○ |
+| `add_files`（`check_duplicate_files=True` 既定） | ○ |
+| `update_schema`（add/rename/update/delete/move/union_by_name） | ○ |
+| **パーティション進化** `update_spec` | ○ |
+| `update_sort_order` | ○（0.11.0〜） |
+| `manage_snapshots`（create/remove tag・branch） | ○ |
+| タイムトラベル、ロールバック | ○ |
+| `scan` → `to_arrow` / `to_pandas` / `to_duckdb` / `to_polars` / `to_ray` / `to_daft` / `to_bodo` | ○ |
+| `inspect.*`（snapshots/partitions/entries/refs/manifests/history/files/…） | ○ |
+| `table.maintenance.expire_snapshots()` | ○ |
 
 ### extras（PyPI の `provides_extra` で実測、全24件）
 

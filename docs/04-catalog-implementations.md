@@ -10,19 +10,19 @@
 
 | 実装 | 提供形態 | 言語 | ライセンス | REST 準拠 | 認証 | vending | RBAC/マルチテナント | View | 成熟度 |
 |---|---|---|---|---|---|---|---|---|---|
-| **Apache Polaris** | OSS（マネージド版あり） | Java | Apache-2.0 | 高（IRC の本命） | OAuth2 client_credentials, OIDC | ✅ S3/GCS/Azure | ✅ catalog/principal role の2層 | ✅ | **ASF TLP（2026-02）**、contributor 156、年間 2,100 commits（**うち35%はボット、人間 1,356**） |
-| **Project Nessie** | OSS | Java | Apache-2.0 | **experimental**、branch は独自 URI 記法 | OIDC/Keycloak, OAuth2 | ✅ signing + assume role | CEL 式ルール | ✅ | **実質1人保守**（年間の人間コミット245件、うち212が1人。全体の85%はボット）。Dremio 主導だが戦略的地位は低下 |
-| **Lakekeeper** | OSS（商用版あり） | **Rust** | Apache-2.0 | 高（ただし準拠バージョンの公式明記なし） | OIDC/OAuth2, K8s SA。**Kerberos なし** | ✅ **最も充実**（S3 signing+STS, ADLS SAS, GCS） | ✅ OpenFGA、project→warehouse | ✅ | **v0.13.1 / pre-1.0**、star 1.4k、**実質コア2名**、**公表採用事例なし** |
-| **Apache Gravitino** | OSS | Java | Apache-2.0 | 中（**マルチテーブル tx・view 登録は非対応と明記**） | Simple/Basic/OAuth2/**Kerberos** | ✅ S3/GCS/ADLS/OSS | ✅ Ranger 連携、metalake 階層 | ✅（1.3.0 で logical view） | **TLP（2025-06）**、v1.3.0、star 3.1k、**Uber/Pinterest 採用** |
-| **Unity Catalog OSS** | OSS | Java/Scala | Apache-2.0 | **読み取り専用・UniForm 経由のみ** | OAuth2/OIDC | — | 3層権限 | ❌ | LF AI&Data **sandbox**、v0.5.0、API 不安定と明記 |
-| **Databricks Unity Catalog** | マネージド | — | 商用 | Managed Iceberg のみ**読み書き可**、Foreign/UniForm は読取のみ | OAuth2/PAT | ✅（Foreign は不可） | UC | ✅（MV は preview） | **GA**（Iceberg v3 も GA） |
-| **AWS Glue Data Catalog** | マネージド | — | 商用 | 中（**view API・RenameTable なし**、単一階層 namespace、独自 prefix `/catalogs/{c}`） | **SigV4** | ✅ Lake Formation 経由 | ✅ **最も強力**（LF 行/列レベル） | ❌ | GA |
-| **Amazon S3 Tables** | マネージド | — | 商用 | 中（**CTAS 不可**＝stage-create なし、**view 非対応**、purge=false 不可） | SigV4（**OAuth 不可**） | ⚠️ ネイティブ endpoint では**文書化なし** | IAM/リソースポリシー | ❌ | GA（REST は 2025-03〜）、**自動 compaction 標準 ON** |
-| **Cloudflare R2 Data Catalog** | マネージド | — | 商用 | 要検証 | **Bearer API token** | ✅（token 権限を継承） | token スコープのみ（粗い） | 不明 | **open beta（GA 未達）** |
-| **Snowflake Open Catalog** | マネージド | — | 商用 | Polaris 準拠 | Polaris 準拠 | ✅ | Polaris RBAC + Horizon | ✅ | GA。**ただし新規顧客に実質クローズ**（下記） |
-| **Hive Metastore** | OSS | Java | Apache-2.0 | REST でない（Thrift） | Kerberos | ❌ | 弱 | 限定 | 枯れているが漸減。**公式な非推奨宣言は存在しない** |
-| **Hadoop catalog** | OSS | Java | Apache-2.0 | REST でない | — | ❌ | ❌ | — | **S3 で危険**。2.0 での deprecate 提案あり |
-| **JDBC catalog** | OSS | Java | Apache-2.0 | REST でない | DB 認証 | ❌ | ❌ | ✅ | 安定。**Hadoop catalog の推奨代替** |
+| **Apache Polaris** | OSS（マネージド版あり） | Java | Apache-2.0 | 高（IRC の本命） | OAuth2 client_credentials, OIDC | ○ S3/GCS/Azure | ○ catalog/principal role の2層 | ○ | **ASF TLP（2026-02）**、contributor 156、年間 2,100 commits（**うち35%はボット、人間 1,356**） |
+| **Project Nessie** | OSS | Java | Apache-2.0 | **experimental**、branch は独自 URI 記法 | OIDC/Keycloak, OAuth2 | ○ signing + assume role | CEL 式ルール | ○ | **実質1人保守**（年間の人間コミット245件、うち212が1人。全体の85%はボット）。Dremio 主導だが戦略的地位は低下 |
+| **Lakekeeper** | OSS（商用版あり） | **Rust** | Apache-2.0 | 高（ただし準拠バージョンの公式明記なし） | OIDC/OAuth2, K8s SA。**Kerberos なし** | ○ **最も充実**（S3 signing+STS, ADLS SAS, GCS） | ○ OpenFGA、project→warehouse | ○ | **v0.13.1 / pre-1.0**、star 1.4k、**実質コア2名**、**公表採用事例なし** |
+| **Apache Gravitino** | OSS | Java | Apache-2.0 | 中（**マルチテーブル tx・view 登録は非対応と明記**） | Simple/Basic/OAuth2/**Kerberos** | ○ S3/GCS/ADLS/OSS | ○ Ranger 連携、metalake 階層 | ○（1.3.0 で logical view） | **TLP（2025-06）**、v1.3.0、star 3.1k、**Uber/Pinterest 採用** |
+| **Unity Catalog OSS** | OSS | Java/Scala | Apache-2.0 | **読み取り専用・UniForm 経由のみ** | OAuth2/OIDC | — | 3層権限 | × | LF AI&Data **sandbox**、v0.5.0、API 不安定と明記 |
+| **Databricks Unity Catalog** | マネージド | — | 商用 | Managed Iceberg のみ**読み書き可**、Foreign/UniForm は読取のみ | OAuth2/PAT | ○（Foreign は不可） | UC | ○（MV は preview） | **GA**（Iceberg v3 も GA） |
+| **AWS Glue Data Catalog** | マネージド | — | 商用 | 中（**view API・RenameTable なし**、単一階層 namespace、独自 prefix `/catalogs/{c}`） | **SigV4** | ○ Lake Formation 経由 | ○ **最も強力**（LF 行/列レベル） | × | GA |
+| **Amazon S3 Tables** | マネージド | — | 商用 | 中（**CTAS 不可**＝stage-create なし、**view 非対応**、purge=false 不可） | SigV4（**OAuth 不可**） | ※ ネイティブ endpoint では**文書化なし** | IAM/リソースポリシー | × | GA（REST は 2025-03〜）、**自動 compaction 標準 ON** |
+| **Cloudflare R2 Data Catalog** | マネージド | — | 商用 | 要検証 | **Bearer API token** | ○（token 権限を継承） | token スコープのみ（粗い） | 不明 | **open beta（GA 未達）** |
+| **Snowflake Open Catalog** | マネージド | — | 商用 | Polaris 準拠 | Polaris 準拠 | ○ | Polaris RBAC + Horizon | ○ | GA。**ただし新規顧客に実質クローズ**（下記） |
+| **Hive Metastore** | OSS | Java | Apache-2.0 | REST でない（Thrift） | Kerberos | × | 弱 | 限定 | 枯れているが漸減。**公式な非推奨宣言は存在しない** |
+| **Hadoop catalog** | OSS | Java | Apache-2.0 | REST でない | — | × | × | — | **S3 で危険**。2.0 での deprecate 提案あり |
+| **JDBC catalog** | OSS | Java | Apache-2.0 | REST でない | DB 認証 | × | × | ○ | 安定。**Hadoop catalog の推奨代替** |
 | **Apache XTable** | OSS | Java | Apache-2.0 | **カタログではない**（メタデータ変換器） | — | — | — | — | **incubating のまま**。0.3.0-incubating（2025-06）から**13ヶ月リリースなし** |
 
 ---
@@ -146,7 +146,7 @@ S3 Tables の自動メンテナンスには重大な落とし穴があります 
 
 **結論: Apache Polaris が最有力。次点で Lakekeeper。**
 
-### 🥇 Apache Polaris — 4サービス・自動ブートストラップ・外部DB不要
+### 1位: Apache Polaris — 4サービス・自動ブートストラップ・外部DB不要
 
 [公式 quickstart compose](https://github.com/apache/polaris/blob/main/site/content/guides/quickstart/docker-compose.yml) の実内容:
 
@@ -192,15 +192,15 @@ TOKEN=$(curl --fail-with-body -s \
 
 - OAuth2 **client_credentials**、`scope=PRINCIPAL_ROLE:ALL`、realm は `Polaris-Realm` ヘッダ
 - ブートストラップ: `POLARIS_BOOTSTRAP_CREDENTIALS: POLARIS,${ROOT_CLIENT_ID:-root},${ROOT_CLIENT_SECRET:-s3cr3t}`（**書式は `realm,clientId,clientSecret`**）
-- ⚠️ **`/v1/oauth/tokens` は削除予定**（[03-rest-catalog.md](03-rest-catalog.md#v1oauthtokens-の非推奨) 参照）。Polaris も「already deprecated for removal due to security concerns」とし、外部 IdP を構成した realm では **HTTP 501** を返します。
+- ※ **`/v1/oauth/tokens` は削除予定**（[03-rest-catalog.md](03-rest-catalog.md#v1oauthtokens-の非推奨) 参照）。Polaris も「already deprecated for removal due to security concerns」とし、外部 IdP を構成した realm では **HTTP 501** を返します。
 
-### 🥈 Lakekeeper — Rust で JVM 不要、Trino/StarRocks 同梱
+### 2位: Lakekeeper — Rust で JVM 不要、Trino/StarRocks 同梱
 
 [`examples/minimal/docker-compose.yaml`](https://github.com/lakekeeper/lakekeeper/blob/main/examples/minimal/docker-compose.yaml): `quay.io/lakekeeper/catalog` + Postgres 17 + SeaweedFS + Jupyter/PySpark + Trino 476 + StarRocks。依存は **Postgres + S3 ストアのみ**。Polaris より1歩重い（Postgres 必須）ですが、Trino/StarRocks が最初から入っているのは魅力です。
 
 > compose 既定は `latest-main` タグ = **開発ブランチ追従**で、リリース版 v0.13.1 とは別物です。
 
-### 🥉 Project Nessie — 最小構成は圧倒的に軽い
+### 3位: Project Nessie — 最小構成は圧倒的に軽い
 
 [`docker/in_memory/docker-compose.yml`](https://github.com/projectnessie/nessie/blob/main/docker/in_memory/docker-compose.yml) は **1サービスのみ**。Git-like ブランチを試すだけなら最速です。ただし REST は experimental。
 
