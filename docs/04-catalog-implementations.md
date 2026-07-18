@@ -271,7 +271,7 @@ TLP ガバナンス、contributor 156名、catalog role / principal role の2層
 | **複数エンジン・複数アカウントの統合ガバナンス** | **Glue Iceberg REST + Lake Formation** | 2025-11 のカタログフェデレーションで Polaris/Unity も Glue 配下に束ねられる |
 | **OSS Polaris と同じ API のまま管理サービス化** | **Snowflake Horizon Catalog** | **Open Catalog は新規顧客に実質クローズ**。新規は Horizon へ誘導される |
 | **Databricks 中心** | **UC 管理版** | Managed Iceberg なら IRC 経由で**読み書き両方 GA**、v3 も GA。ただし **Foreign Iceberg / UniForm 経由は読み取り専用かつ vending 不可**という非対称性に注意 |
-| **エグレス費用が支配的な多クラウド** | **R2 Data Catalog**（エグレス無料） | **依然 open beta で GA 未達**、RBAC は token スコープのみ。本番採用は慎重に |
+| **データ持ち出し料金（エグレス）が支配的な多クラウド** | **R2 Data Catalog**（エグレス無料） | **依然 open beta で GA 未達**、RBAC は token スコープのみ。本番採用は慎重に |
 
 ---
 

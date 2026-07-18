@@ -27,10 +27,10 @@ flowchart TD
     Q3 -->|"いいえ"| PH["Paimon または Hudi"]
 
     Q2 -->|"バッチ中心<br/>更新は日次〜時間単位"| Q4{"使うエンジンは？"}
-    Q4 -->|"単一プラットフォームで完結<br/>（Databricks / Snowflake のみ等）"| NA["そのプラットフォームの<br/>ネイティブ形式"]
+    Q4 -->|"単一プラットフォームで完結<br/>（Databricks や<br/>Snowflake のみ等）"| NA["そのプラットフォームの<br/>ネイティブ形式"]
     Q4 -->|"Azure / Fabric 中心"| DE["Delta Lake<br/>（Fabric のネイティブ）"]
     Q4 -->|"複数エンジンで共有したい"| Q5{"AI/ML の非構造データを<br/>同居させるか？"}
-    Q5 -->|"はい"| HU["Hudi<br/>（VECTOR/BLOB 型、Lance 統合）"]
+    Q5 -->|"はい"| HU["Hudi<br/>（VECTOR/BLOB 型、<br/>Lance 統合）"]
     Q5 -->|"いいえ"| IC["Iceberg<br/>→ 段階2へ"]
 ```
 
@@ -57,18 +57,18 @@ Iceberg を選んだら、次はカタログです。**フォーマットより�
 flowchart TD
     S["Iceberg のカタログを選ぶ"] --> Q1{"セルフホストか<br/>マネージドか？"}
 
-    Q1 -->|"まず試したい・学びたい"| PO1["Apache Polaris<br/>（quickstart は4サービス・外部DB不要）"]
+    Q1 -->|"まず試したい・学びたい"| PO1["Apache Polaris<br/>quickstart は4サービス<br/>外部DB不要"]
 
     Q1 -->|"セルフホストで本番"| Q2{"特殊要件は？"}
-    Q2 -->|"Kerberos / 既存 Hadoop 資産"| GR["Apache Gravitino"]
-    Q2 -->|"特になし<br/>ベンダー中立を重視"| PO2["Apache Polaris<br/>（ASF TLP、2層 RBAC、realm 分離）"]
+    Q2 -->|"Kerberos や<br/>既存 Hadoop 資産"| GR["Apache Gravitino"]
+    Q2 -->|"特になし<br/>ベンダー中立を重視"| PO2["Apache Polaris<br/>ASF TLP・2層 RBAC<br/>realm 分離"]
 
-    Q1 -->|"マネージド"| Q3{"どのクラウド / 何を重視？"}
-    Q3 -->|"AWS・運用ゼロ最優先"| S3T["S3 Tables<br/>※CTAS 不可・view 非対応"]
-    Q3 -->|"AWS・行/列レベルのガバナンス"| GL["Glue + Lake Formation"]
-    Q3 -->|"Databricks 中心"| UC["Unity Catalog<br/>※Managed Iceberg のみ読み書き可"]
-    Q3 -->|"Polaris と同じ API のまま"| HZ["Snowflake Horizon Catalog<br/>※Open Catalog は新規顧客は不可"]
-    Q3 -->|"エグレス費用が支配的"| R2["R2 Data Catalog<br/>※open beta"]
+    Q1 -->|"マネージド"| Q3{"どのクラウドか<br/>何を重視するか"}
+    Q3 -->|"AWS・運用ゼロ最優先"| S3T["S3 Tables<br/>※CTAS 不可<br/>view 非対応"]
+    Q3 -->|"AWS で<br/>行・列レベルのガバナンス"| GL["Glue + Lake Formation"]
+    Q3 -->|"Databricks 中心"| UC["Unity Catalog<br/>※Managed Iceberg のみ<br/>読み書き可"]
+    Q3 -->|"Polaris と同じ API のまま"| HZ["Snowflake<br/>Horizon Catalog<br/>※Open Catalog は<br/>新規受付なし"]
+    Q3 -->|"データ持ち出し料金<br/>（エグレス）が支配的"| R2["R2 Data Catalog<br/>※open beta"]
 ```
 
 選定時に効く制約（詳細は [04](04-catalog-implementations.md#選定指針)）:
@@ -76,10 +76,12 @@ flowchart TD
 | 選択肢 | 見落としやすい制約 |
 |---|---|
 | **S3 Tables** | **CTAS 不可**（stage-create なし）、**view 非対応**。さらに**タグやブランチを1つ作るだけで自動スナップショット管理がテーブル全体で停止**（fail-closed）し、失敗は課金増加としてしか現れない → [06 C-1](06-operations.md#c-1-amazon-s3-tables) |
-| **Databricks UC** | Managed Iceberg のみ読み書き可。**Foreign Iceberg は読み取り専用で credential vending 非対応**。Databricks から他の IRC 準拠カタログへは繋ぎに行けない |
+| **Databricks UC** | Managed Iceberg のみ読み書き可。**Foreign Iceberg は読み取り専用で credential vending 非対応**。また **IRC 接続は一方通行**で、外部エンジンが UC に繋ぎに来ることはできても、**Databricks が Polaris など他のカタログへ繋ぎに行くことはできません**（既存カタログがある場合、UC に寄せる必要が生じます） |
 | **Snowflake Open Catalog** | **新規顧客はサインアップできない**（Horizon へ誘導）。既存顧客は継続利用可 |
 | **Lakekeeper** | 技術的な出来は良いが **pre-1.0・実質コア2名・公表採用事例ゼロ**。リスクを取れる場合の選択肢 |
 | **Hadoop catalog** | **オブジェクトストレージで安全でない**。仕様も deprecated としており v4 で削除予定。推奨代替は **JDBC catalog** → [04](04-catalog-implementations.md#hadoop-catalog-は本番使用不可) |
+
+> **用語**: **エグレス費用**（egress cost）は、クラウドから**データを外部へ持ち出すときにかかる通信料金**です。ストレージに置くことや同一クラウド内で読むことは安価でも、インターネットや他社クラウドへ出すと GB 単位で課金されます。複数クラウドにまたがって同じテーブルを共有する構成では、これが総コストを左右することがあります。
 
 ---
 
@@ -89,18 +91,18 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    S["やりたい操作は？"] --> Q1{"行レベルの更新・削除<br/>（UPDATE / DELETE / MERGE）"}
+    S["やりたい操作は？"] --> Q1{"行レベルの更新・削除<br/>UPDATE / DELETE<br/>MERGE"}
     Q1 -->|"必要"| Q2{"どのエンジン？"}
-    Q2 -->|"Spark / Trino / Dremio / Hive"| OK1["フル DML 可"]
-    Q2 -->|"Flink"| NG1["INSERT / UPSERT のみ<br/>MERGE・UPDATE・DELETE の SQL なし"]
+    Q2 -->|"Spark / Trino<br/>Dremio / Hive"| OK1["フル DML 可"]
+    Q2 -->|"Flink"| NG1["INSERT / UPSERT のみ<br/>MERGE・UPDATE・DELETE<br/>の SQL なし"]
     Q2 -->|"StarRocks"| NG2["INSERT 系のみ"]
-    Q2 -->|"PyIceberg"| NG3["delete は可だが CoW のみ<br/>MERGE 相当は upsert で限定的"]
+    Q2 -->|"PyIceberg"| NG3["delete は可だが CoW のみ<br/>MERGE 相当は<br/>upsert で限定的"]
     Q2 -->|"Presto (Java)"| NG4["MERGE 非対応"]
 
-    Q1 -->|"読み取り中心"| Q3{"v3 の機能を使うか？<br/>（DV / row lineage / VARIANT）"}
+    Q1 -->|"読み取り中心"| Q3{"v3 の機能を使うか？<br/>DV / row lineage<br/>VARIANT"}
     Q3 -->|"使う"| Q4{"エンジンの v3 対応は？"}
-    Q4 -->|"Snowflake / Databricks"| OKv3["GA"]
-    Q4 -->|"Trino"| NGv3["公式 docs 上まだ experimental"]
+    Q4 -->|"Snowflake<br/>Databricks"| OKv3["GA"]
+    Q4 -->|"Trino"| NGv3["公式 docs 上<br/>まだ experimental"]
     Q4 -->|"Dremio"| PRv3["Preview（Cloud のみ）"]
     Q4 -->|"PyIceberg"| NOv3["読めるが書けない"]
     Q3 -->|"使わない"| OK2["v2 で十分<br/>（既定も v2）"]

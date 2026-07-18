@@ -165,7 +165,7 @@ Confluent Tableflow、Fivetran Managed Data Lake Service（**既定で Apache Po
 
 4. **Databricks の Iceberg 対応には条件が付きます。** Onehouse の Kyle Weller 氏（VP of Product、**Iceberg 競合ベンダー = 利害関係者である点に留意**）が 2026-06-11 に指摘した内容のうち、Databricks 公式ドキュメントの引用に基づくものは重いです:
     - **Unity Catalog が必須** → Polaris や Nessie を代替カタログとして使えない
-    - **非対称な相互運用**: 外部エンジンは UC に IRC で繋げるが、**Databricks から他の IRC 準拠カタログへは繋ぎに行けない**
+    - **非対称な相互運用**: IRC 接続には向きがあり、UC は**サーバとしては働くがクライアントとしては働きません**。外部エンジン（Spark/Flink/Trino）が UC に繋ぎに来ることはできますが、**Databricks 側から Polaris や Nessie のテーブルを IRC 経由で読みに行くことはできません**
     - Foreign Iceberg テーブルは **"read-only in Databricks and have limited platform support"**、**credential vending 非対応**
     - Managed Iceberg でも partition transforms / branching / tagging / streaming が欠落し、独自機能（Liquid Clustering 等）で代替
     - Databricks 自身の Lakeflow / Zerobus Ingest / AI Search は主に Delta 対応
