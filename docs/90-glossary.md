@@ -259,7 +259,7 @@ IRC のパスに含まれるパスパラメータ。仕様上の定義は「An o
 
 **出典**: 公式ドキュメント（`maintenance.md`, `spark-procedures.md`）/ → [06](06-operations.md#a-3-expire_snapshots)
 
-### orphan file（孤児ファイル）
+### orphan file
 
 どのメタデータからも参照されていないファイル。ジョブ失敗などで発生します（データを先に書き、メタデータを後でコミットする順序のため構造的に避けられません）。
 

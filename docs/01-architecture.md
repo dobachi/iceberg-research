@@ -266,7 +266,7 @@ Puffin は統計とインデックスのための blob コンテナ形式です�
 | `partitions` | 現在のパーティションとレコード数 |
 | `position_deletes` | position delete の中身 |
 | `refs` | branch / tag 一覧 |
-| `all_*`（`all_files`, `all_entries`, `all_manifests` ほか） | **全スナップショット横断**。孤児ファイル調査に有用だがコスト高 |
+| `all_*`（`all_files`, `all_entries`, `all_manifests` ほか） | **全スナップショット横断**。orphan file の調査に有用だがコスト高 |
 
 実務上の注意:
 
