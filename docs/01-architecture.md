@@ -276,16 +276,46 @@ Puffin は統計とインデックスのための blob コンテナ形式です�
 
 ## タイムトラベルと2つの履歴
 
-**Iceberg には2種類の履歴があり、食い違うことがあります。**
+Iceberg では過去のテーブル状態を2通りの指定で読めます。**スナップショット ID（バージョン）指定**と**時刻指定**です（Spark なら `VERSION AS OF <id>` と `TIMESTAMP AS OF '<時刻>'`）。ID 指定は素直で、そのスナップショットをそのまま読むだけです。ややこしいのは時刻指定のほうで、その理由が「2つの履歴」にあります。
 
-1. `snapshot-log`（過去の "current snapshot" の履歴）
-2. `snapshots` 内の parent-child 系譜
+**Iceberg は履歴を2つの別々の形で持っていて、両者は食い違うことがあります。**
+
+- **系譜（parent-child lineage）**: `snapshots` に記録される、スナップショットの親子関係です。コミットのたびに「直前の current を親として新しいスナップショットができる」という、**どう作られたかの系図**です。
+- **current の履歴（`snapshot-log`）**: 「いつ、どのスナップショットが current になったか」を時刻つきで並べた**時系列のログ**です。各エントリは（時刻, snapshot-id）の対になっています。
 
 > These two histories **might indicate different snapshot IDs for a specific timestamp**.
 
-原因は「updating the `current-snapshot-id` can be used to set the snapshot of a table to **any arbitrary snapshot**, which might have a lineage derived from a table branch or **no lineage at all**」。`set_current_snapshot` プロシージャが系譜を持たないエントリを snapshot-log に生む可能性があります。
+ふだんはこの2つは一致します。通常のコミットは、新しいスナップショットの親を直前の current にしつつ、同時に snapshot-log にも新しいエントリを足すので、系図をたどっても時系列をたどっても同じ順序になるからです。ずれるのは、**current を「任意の既存スナップショット」へ動かす操作**をしたときです。仕様の言葉では:
 
-**仕様の指示**: 「When processing point in time queries implementations **should use "snapshot-log" metadata**」。該当が無い、または snapshot-log が未 populate なら「informative error message」を出すべきとされています。
+> updating the `current-snapshot-id` can be used to set the snapshot of a table to **any arbitrary snapshot**, which might have a lineage derived from a table branch or **no lineage at all**
+
+`rollback_to_snapshot` や `set_current_snapshot`、cherry-pick がこれに当たります。これらは新しいスナップショットを作らず、current のポインタを既存のスナップショットへ移すだけです。すると **snapshot-log には「その時刻に current が X になった」と記録される一方、X の親子系譜は元のまま**なので、両者がずれます。
+
+具体例で見ます。10:00・11:00・12:00 に普通に3回コミットし、その後 12:30 に S1 へロールバックしたとします。
+
+系譜は、ロールバックしても変わりません。
+
+```mermaid
+flowchart LR
+    S1["S1<br/>10:00"] --> S2["S2<br/>11:00"] --> S3["S3<br/>12:00"]
+```
+
+一方 current の履歴（snapshot-log）は、ロールバックで末尾に1行増えます。
+
+| 時刻 | current になった snapshot |
+|---|---|
+| 10:00 | S1 |
+| 11:00 | S2 |
+| 12:00 | S3 |
+| **12:30** | **S1（ロールバック）** |
+
+ここで「**12:15 時点の状態**」を時刻指定で読むと、何が返るべきでしょうか。答えは **S3** です。12:15 の時点で、テーブルは実際に S3 だったからです。これは snapshot-log を見れば分かります（12:15 以前で最も新しいエントリは 12:00 → S3）。ところが、現在の current（S1）から親子系譜をさかのぼっても、S1 の祖先に S3 は出てきません。**時刻指定のタイムトラベルは、系譜ではなく snapshot-log を使わないと正しく答えられない** — これがこの節の要点です。
+
+> **仕様の指示**: 「When processing point in time queries implementations **should use "snapshot-log" metadata**」
+
+該当するエントリが無い、または snapshot-log が未 populate（optional フィールドなので空のこともあります）なら、推測で答えず「informative error message」を出すべきとされています。
+
+なお [メタデータテーブル](#メタデータテーブル)の `history` に `is_current_ancestor` 列があるのは、まさにこの区別のためです。ロールバック後、S2 と S3 は現在の current（S1）の祖先ではなくなるので `is_current_ancestor = false` になり、「時系列には現れるが、いまの系譜からは外れたスナップショット」を見分けられます。
 
 ---
 
