@@ -54,6 +54,32 @@ catalog                       … テーブル → 現 metadata ファイルへ�
 - 「A manifest stores files for a **single partition spec**.」— manifest の Avro スキーマがパーティションスペックに依存するため、スペックが変わればファイルは別の manifest に書かれます。
 - 「All columns must be written to data files even if they introduce redundancy with metadata（例: identity パーティション列）… provides a **backup in case of corruption or bugs in the metadata layer**.」— メタデータ層のバグに対する保険として、冗長でも全列を書きます。
 
+### 具体例: 1回の追記で何が起きるか
+
+抽象的なので、小さなテーブルに一度だけ追記した場合を追ってみます（以下のファイル名は説明用の例です）。
+
+`db.events`（列は `event_id`, `region`, `ts`。`ts` の日付でパーティション）に、7月1日と7月2日にまたがる数行を1回 `INSERT` したとします。生成されるファイルはこうなります。
+
+```
+s3://warehouse/db/events/
+├─ metadata/
+│   ├─ 00001-8a1f….metadata.json     ← 追記後のテーブル状態。ここに snapshot が1つ
+│   ├─ snap-73…-1-b2c….avro          ← manifest list（このスナップショット用に1つ）
+│   └─ 0f9…-m0.avro                   ← manifest（下の2ファイルを列挙）
+└─ data/
+    ├─ ts_day=2026-07-01/00000-….parquet   ← 7/1 の行
+    └─ ts_day=2026-07-02/00000-….parquet   ← 7/2 の行
+```
+
+このテーブルを読むエンジンは、次の順にたどります。
+
+1. **カタログ**に「`db.events` の現在の metadata はどれか」を尋ね、`00001-8a1f….metadata.json` を得る。
+2. その **metadata.json** を読み、現在のスナップショットが指す **manifest list**（`snap-73…-1-b2c….avro`）にたどり着く。
+3. **manifest list** から、このスナップショットに属する **manifest**（`0f9…-m0.avro`）を得る。ここには各 manifest のパーティション要約統計も入っている。
+4. **manifest** を読み、実際の **データファイル**2つと、それぞれの列統計・パーティション値を得る。
+
+肝心なのは、**どのファイルがテーブルに属するかを、一度もストレージを一覧せずに確定できる**ことです。`data/` の下を `ls` して回るのではなく、メタデータをたどるだけで「読むべきは2ファイル」と分かります。2回目の追記をすると、新しい metadata.json・manifest list・manifest が増え、カタログのポインタがそちらへ差し替わります（[ACID と楽観的並行制御](#acid-と楽観的並行制御)）。古いスナップショットのファイルはそのまま残るので、[タイムトラベル](#タイムトラベルと2つの履歴)で過去の状態も読めます。
+
 ---
 
 ## ACID と楽観的並行制御
@@ -127,6 +153,14 @@ manifest list の各エントリは `field_summary`（`contains_null` / `contain
 > **The same filter logic can be used for both data and delete files** because both store metrics of the rows either inserted or deleted. If metrics show that a delete file has no rows that match a scan predicate, it may be **ignored just as a data file would be**.
 
 具体例（仕様より）: 「if `file_a` has rows with `id` between 1 and 10 and a delete file contains rows with `id` between 1 and 4, a scan for `id = 9` **may ignore the delete file**」— **delete ファイルもプルーニング対象**です。MoR の性能を理解する上で重要な点です。
+
+**段1〜3が実際にどう効くか**、先ほどの `db.events` が1年分・数千ファイルに育った状態で、`WHERE region = 'asia' AND ts >= '2026-12-01'` を投げた場合で追ってみます（ファイル数は説明用の概数です）。
+
+- **段1（manifest スキップ）**: manifest list の要約統計を見て、`ts` の範囲が 12/1 より前で閉じている manifest を丸ごと飛ばす。1〜11月ぶんの manifest がここで落ち、その中の数千ファイルは**そもそも見に行かない**。
+- **段2（パーティションプルーニング）**: 残った manifest 内で、`ts >= '2026-12-01'` を inclusive projection で `ts_day >= day('2026-12-01')` に変換し、12月より前のパーティションのファイルを除外する。
+- **段3（列統計でのファイル除外）**: 残ったファイルごとに `region` 列の lower/upper bound を見て、`asia` を含みえないファイル（例: `region` が `europe` しか入っていないファイル）を、開かずに落とす。
+
+こうして数千ファイルが、実際に開く十数ファイルまで絞られます。**どの段でもデータファイルの中身は読まず、メタデータに記録された範囲情報だけで判断している**のが要点です。これが「O(1) remote calls でプランする」の中身であり、テーブルが何倍に育ってもプランニングのコストが比例して増えない理由です。
 
 ### inclusive projection とは
 
