@@ -48,7 +48,26 @@ info:
 
 ## 2. エンドポイント一覧（全35オペレーション）
 
-IRC の API は、大きく **リソース階層（namespace の中に table と view がある）への CRUD** と、それを支える **横断的な操作群**（設定取得・認証・トランザクション・スキャンプランニング・認証情報の払い出し）でできています。namespace / table / view はどれも **list（一覧）・create（作成）・load（読み込み）・update（更新）・drop（削除）・exists（存在確認）** という同じ形をしているので、1つ分かれば残りも読めます。以下、グループごとに見ていきます。
+IRC の API は、大きく **リソース階層（namespace の中に table と view がある）への CRUD** と、それを支える **横断的な操作群**（設定取得・認証・トランザクション・スキャンプランニング・認証情報の払い出し）でできています。namespace / table / view はどれも **list（一覧）・create（作成）・load（読み込み）・update（更新）・drop（削除）・exists（存在確認）** という同じ形をしているので、1つ分かれば残りも読めます。
+
+```mermaid
+flowchart TD
+    C["GET /v1/config を最初に叩く<br/>（設定・対応機能を受け取る）"] --> NS["Namespace<br/>テーブル/view の入れ物"]
+    NS --> T["Table"]
+    NS --> V["View"]
+    T --> W["updateTable（コミット）<br/>＝唯一の書き込み経路"]
+    subgraph CRUD["namespace / table / view は同じ形"]
+      O["list・create・load・update・drop・exists"]
+    end
+    subgraph X["横断的な操作群（どのリソースにも効く）"]
+      AU["認証：OAuth2 / Bearer / SigV4"]
+      TX["Transaction：複数テーブルを一括コミット"]
+      SP["Scan Planning：読むファイルの計画"]
+      CR["Credentials / Sign：短命の認証情報を払い出す"]
+    end
+```
+
+以下、グループごとに見ていきます。
 
 ### Configuration
 
