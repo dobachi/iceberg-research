@@ -161,16 +161,16 @@ Confluent Tableflow、Fivetran Managed Data Lake Service（**既定で Apache Po
 
 2. **Fivetran も両対応。** Iceberg *または* Delta に変換し、Parquet を1回書いて**両方のメタデータを同時維持**する設計。「Iceberg を選んだ」のではなく「**選ばせない**」戦略です。
 
-3. **Microsoft Fabric のネイティブは依然 Delta。** Iceberg 対応は仮想化レイヤー経由で、V3 互換は未完了。Azure スタックでは Delta が一級市民のままです。
+3. **Microsoft Fabric が標準で使うのは依然 Delta です。** Iceberg 対応は仮想化レイヤー経由で、V3 互換は未完了。Azure スタックでは Delta が本命の座を保っています。
 
 4. **Databricks の Iceberg 対応には条件が付きます。** Onehouse の Kyle Weller 氏（VP of Product、**Iceberg 競合ベンダー = 利害関係者である点に留意**）が 2026-06-11 に指摘した内容のうち、Databricks 公式ドキュメントの引用に基づくものは重いです:
-   - **Unity Catalog が必須** → Polaris や Nessie を代替カタログとして使えない
-   - **非対称な相互運用**: 外部エンジンは UC に IRC で繋げるが、**Databricks から他の IRC 準拠カタログへは繋ぎに行けない**
-   - Foreign Iceberg テーブルは **"read-only in Databricks and have limited platform support"**、**credential vending 非対応**
-   - Managed Iceberg でも partition transforms / branching / tagging / streaming が欠落し、独自機能（Liquid Clustering 等）で代替
-   - Databricks 自身の Lakeflow / Zerobus Ingest / AI Search は主に Delta 対応
+    - **Unity Catalog が必須** → Polaris や Nessie を代替カタログとして使えない
+    - **非対称な相互運用**: 外部エンジンは UC に IRC で繋げるが、**Databricks から他の IRC 準拠カタログへは繋ぎに行けない**
+    - Foreign Iceberg テーブルは **"read-only in Databricks and have limited platform support"**、**credential vending 非対応**
+    - Managed Iceberg でも partition transforms / branching / tagging / streaming が欠落し、独自機能（Liquid Clustering 等）で代替
+    - Databricks 自身の Lakeflow / Zerobus Ingest / AI Search は主に Delta 対応
 
-   → **「Iceberg 対応」は「Iceberg 仕様のフルサポート」を意味しません。** ただし個別の制限事項の現時点での正確性は**未確認**（docs は頻繁に更新されるため）。
+    → **「Iceberg 対応」は「Iceberg 仕様のフルサポート」を意味しません。** ただし個別の制限事項の現時点での正確性は**未確認**（docs は頻繁に更新されるため）。
 
 5. **Paimon が最速で開発されています**（コミット 2,271/年、Iceberg の 1.35倍）。Iceberg に吸収される兆候はありません。
 
