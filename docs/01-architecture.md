@@ -185,6 +185,17 @@ manifest list の各エントリは `field_summary`（`contains_null` / `contain
 
 **段1〜3が実際にどう効くか**、先ほどの `db.events` が1年分・数千ファイルに育った状態で、`WHERE region = 'asia' AND ts >= '2026-12-01'` を投げた場合で追ってみます（ファイル数は説明用の概数です）。
 
+```mermaid
+flowchart TD
+    N0["テーブル全体　≈ 数千ファイル"]
+    N1["12月の manifest が指すファイルのみ"]
+    N2["12月パーティションのファイル"]
+    N3["実際に開く　≈ 十数ファイル"]
+    N0 -->|"段1: manifest list の ts 範囲で<br/>1〜11月の manifest を丸ごとスキップ"| N1
+    N1 -->|"段2: ts≥12/1 → ts_day≥day(12/1) で<br/>12月より前のパーティションを除外"| N2
+    N2 -->|"段3: region 列の bound で<br/>asia を含まないファイルを除外"| N3
+```
+
 - **段1（manifest スキップ）**: manifest list の要約統計を見て、`ts` の範囲が 12/1 より前で閉じている manifest を丸ごと飛ばす。1〜11月ぶんの manifest がここで落ち、その中の数千ファイルは**そもそも見に行かない**。
 - **段2（パーティションプルーニング）**: 残った manifest 内で、`ts >= '2026-12-01'` を inclusive projection で `ts_day >= day('2026-12-01')` に変換し、12月より前のパーティションのファイルを除外する。
 - **段3（列統計でのファイル除外）**: 残ったファイルごとに `region` 列の lower/upper bound を見て、`asia` を含みえないファイル（例: `region` が `europe` しか入っていないファイル）を、開かずに落とす。
@@ -193,11 +204,25 @@ manifest list の各エントリは `field_summary`（`contains_null` / `contain
 
 ### inclusive projection とは
 
+パーティションの厄介なところは、**生の列そのものではなく、その列を変換した値でデータを仕分ける**点にあります。`db.events` は `ts` の日付（`day(ts)` = `ts_day`）でパーティションされていますが、ユーザーが書くクエリの条件は生の `ts` に対する `ts > X` です。ここで「`ts_day` に一言も触れていないクエリから、どうやって `ts_day` を使って不要なパーティションを飛ばすのか」という問題が生じます。この橋渡しをするのが inclusive projection です。
+
 > if a scan predicate matches a row, then the partition predicate must match that row's partition. This is called _inclusive_ because **rows that do not match the scan predicate may be included in the scan** by the partition predicate.
 
-例: `ts_day=day(ts)` パーティションで `ts > X` → `ts_day >= day(X)`。**false positive は許容、false negative は不可**という非対称な保証です。これが hidden partitioning（クエリにパーティション列を書かなくてよい）の実体です。
+inclusive projection は、生の列への述語を**パーティション値への述語に変換する規則**で、次の保証を持ちます — **ある行が元の述語を満たすなら、その行が属するパーティションは必ず変換後の述語を満たす**。裏返せば（対偶）、**変換後の述語を満たさないパーティションには、元の述語を満たす行が1つも無い**。だからそのパーティションは丸ごと飛ばして安全です。これが段2のプルーニングの根拠です。
 
-対になる **strict projection** は「a partition predicate that will match a file **if all of the rows in the file must match** the scan predicate」で、各ファイルの residual predicate 計算に使われます。
+具体的に見ます。`ts > '2026-03-15 10:00'` という条件を、`ts_day = day(ts)` のパーティションに投影します。この条件を満たす行は必ず 2026-03-15 以降の日付にあるので、変換後の述語は `ts_day >= day('2026-03-15')`、つまり **`ts_day >= 2026-03-15`** になります。
+
+ここで**変換がわざと緩い**ことに注目してください。2026-03-15 のパーティションには、00:00〜10:00 の（`ts > 10:00` を満たさない）行も混じっています。それでもこのパーティションは「含める」側に倒します。逆に、03-15 より前のパーティションに `ts > '…10:00'` を満たす行は絶対に無いので、そこは確実に飛ばせます。
+
+この非対称さが肝です。**false positive（実際には該当行が無いパーティションやファイルを読んでしまう）は許容**します — 無駄な読み込みは起きますが、答えは正しいままです。一方 **false negative（該当行があるパーティションを飛ばしてしまう）は絶対に許されません** — 答えが欠けてしまうからです。inclusive projection は「取りこぼしゼロ、その代わり多少の空振りは許す」という設計で、だからこそプルーニングに安全に使えます。緩い側（inclusive）に倒すのはそのためです。
+
+しかも、この変換をエンジンが**クエリの述語から自動で導く**ので、ユーザーは `ts_day` を書く必要がありません。Hive なら `WHERE ts > X AND ts_day >= '2026-03-15'` のように論理条件とパーティション条件の両方を書く必要がありましたが、Iceberg では `WHERE ts > X` だけで済みます。これが hidden partitioning（パーティション列がクエリから「隠れている」）の実体です。パーティションの切り方を後から変えても（[パーティション進化](02-table-spec.md#パーティション進化と-transform)）クエリを書き換えずに済むのも、この自動変換のおかげです。
+
+対になるのが **strict projection** です。
+
+> a partition predicate that will match a file **if all of the rows in the file must match** the scan predicate
+
+strict projection は inclusive の逆で、**そのファイルの全行が確実に述語を満たすときだけ**マッチする、厳しい側に倒した変換です。用途は **residual predicate（残余述語）の計算**です。あるファイルのパーティションが strict projection にマッチするなら、そのファイルの行はパーティション由来の条件を全て満たすと分かっているので、**その部分は行ごとに再チェックしなくてよい**。残った条件（residual）だけを各行に当てれば済み、無駄な評価が減ります。inclusive が「読むファイルを絞る」ため、strict が「読んだファイルの中で何を再評価すべきかを削る」ため、と役割が対になっています。
 
 ### 未知の transform
 
