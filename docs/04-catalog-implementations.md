@@ -8,22 +8,64 @@
 
 ## 比較表
 
-| 実装 | 提供形態 | 言語 | ライセンス | REST 準拠 | 認証 | vending | RBAC/マルチテナント | View | 成熟度 |
-|---|---|---|---|---|---|---|---|---|---|
-| **Apache Polaris** | OSS（マネージド版あり） | Java | Apache-2.0 | 高（IRC の本命） | OAuth2 client_credentials, OIDC | ○ S3/GCS/Azure | ○ catalog/principal role の2層 | ○ | **ASF TLP（2026-02）**、contributor 156、年間 2,100 commits（**うち35%はボット、人間 1,356**） |
-| **Project Nessie** | OSS | Java | Apache-2.0 | **experimental**、branch は独自 URI 記法 | OIDC/Keycloak, OAuth2 | ○ signing + assume role | CEL 式ルール | ○ | **実質1人保守**（年間の人間コミット245件、うち212が1人。全体の85%はボット）。Dremio 主導だが戦略的地位は低下 |
-| **Lakekeeper** | OSS（商用版あり） | **Rust** | Apache-2.0 | 高（ただし準拠バージョンの公式明記なし） | OIDC/OAuth2, K8s SA。**Kerberos なし** | ○ **最も充実**（S3 signing+STS, ADLS SAS, GCS） | ○ OpenFGA、project→warehouse | ○ | **v0.13.1 / pre-1.0**、star 1.4k、**実質コア2名**、**公表採用事例なし** |
-| **Apache Gravitino** | OSS | Java | Apache-2.0 | 中（**マルチテーブル tx・view 登録は非対応と明記**） | Simple/Basic/OAuth2/**Kerberos** | ○ S3/GCS/ADLS/OSS | ○ Ranger 連携、metalake 階層 | ○（1.3.0 で logical view） | **TLP（2025-06）**、v1.3.0、star 3.1k、**Uber/Pinterest 採用** |
-| **Unity Catalog OSS** | OSS | Java/Scala | Apache-2.0 | **読み取り専用・UniForm 経由のみ** | OAuth2/OIDC | — | 3層権限 | × | LF AI&Data **sandbox**、v0.5.0、API 不安定と明記 |
-| **Databricks Unity Catalog** | マネージド | — | 商用 | Managed Iceberg のみ**読み書き可**、Foreign/UniForm は読取のみ | OAuth2/PAT | ○（Foreign は不可） | UC | ○（MV は preview） | **GA**（Iceberg v3 も GA） |
-| **AWS Glue Data Catalog** | マネージド | — | 商用 | 中（**view API・RenameTable なし**、単一階層 namespace、独自 prefix `/catalogs/{c}`） | **SigV4** | ○ Lake Formation 経由 | ○ **最も強力**（LF 行/列レベル） | × | GA |
-| **Amazon S3 Tables** | マネージド | — | 商用 | 中（**CTAS 不可**＝stage-create なし、**view 非対応**、purge=false 不可） | SigV4（**OAuth 不可**） | ※ ネイティブ endpoint では**文書化なし** | IAM/リソースポリシー | × | GA（REST は 2025-03〜）、**自動 compaction 標準 ON** |
-| **Cloudflare R2 Data Catalog** | マネージド | — | 商用 | 要検証 | **Bearer API token** | ○（token 権限を継承） | token スコープのみ（粗い） | 不明 | **open beta（GA 未達）** |
-| **Snowflake Open Catalog** | マネージド | — | 商用 | Polaris 準拠 | Polaris 準拠 | ○ | Polaris RBAC + Horizon | ○ | GA。**ただし新規顧客に実質クローズ**（下記） |
-| **Hive Metastore** | OSS | Java | Apache-2.0 | REST でない（Thrift） | Kerberos | × | 弱 | 限定 | 枯れているが漸減。**公式な非推奨宣言は存在しない** |
-| **Hadoop catalog** | OSS | Java | Apache-2.0 | REST でない | — | × | × | — | **S3 で危険**。2.0 での deprecate 提案あり |
-| **JDBC catalog** | OSS | Java | Apache-2.0 | REST でない | DB 認証 | × | × | ○ | 安定。**Hadoop catalog の推奨代替** |
-| **Apache XTable** | OSS | Java | Apache-2.0 | **カタログではない**（メタデータ変換器） | — | — | — | — | **incubating のまま**。0.3.0-incubating（2025-06）から**13ヶ月リリースなし** |
+### 一覧
+
+提供形態とライセンス、credential vending と view の対応です。
+
+| 実装 | 提供形態 | 言語 | ライセンス | vending | View |
+|---|---|---|---|---|---|
+| **Apache Polaris** | OSS（マネージド版あり） | Java | Apache-2.0 | ○ S3/GCS/Azure | ○ |
+| **Project Nessie** | OSS | Java | Apache-2.0 | ○ signing + assume role | ○ |
+| **Lakekeeper** | OSS（商用版あり） | **Rust** | Apache-2.0 | ○ **最も充実**（S3 signing+STS, ADLS SAS, GCS） | ○ |
+| **Apache Gravitino** | OSS | Java | Apache-2.0 | ○ S3/GCS/ADLS/OSS | ○（1.3.0 で logical view） |
+| **Unity Catalog OSS** | OSS | Java/Scala | Apache-2.0 | — | × |
+| **Databricks Unity Catalog** | マネージド | — | 商用 | ○（Foreign は不可） | ○（MV は preview） |
+| **AWS Glue Data Catalog** | マネージド | — | 商用 | ○ Lake Formation 経由 | × |
+| **Amazon S3 Tables** | マネージド | — | 商用 | ※ ネイティブ endpoint では**文書化なし** | × |
+| **Cloudflare R2 Data Catalog** | マネージド | — | 商用 | ○（token 権限を継承） | 不明 |
+| **Snowflake Open Catalog** | マネージド | — | 商用 | ○ | ○ |
+| **Hive Metastore** | OSS | Java | Apache-2.0 | × | 限定 |
+| **Hadoop catalog** | OSS | Java | Apache-2.0 | × | — |
+| **JDBC catalog** | OSS | Java | Apache-2.0 | × | ○ |
+| **Apache XTable** | OSS | Java | Apache-2.0 | — | — |
+
+### 仕様準拠・認証・権限管理
+
+| 実装 | REST 準拠 | 認証 | RBAC / マルチテナント |
+|---|---|---|---|
+| **Apache Polaris** | 高（IRC の本命） | OAuth2 client_credentials, OIDC | ○ catalog/principal role の2層 |
+| **Project Nessie** | **experimental**、branch は独自 URI 記法 | OIDC/Keycloak, OAuth2 | CEL 式ルール |
+| **Lakekeeper** | 高（ただし準拠バージョンの公式明記なし） | OIDC/OAuth2, K8s SA。**Kerberos なし** | ○ OpenFGA、project→warehouse |
+| **Apache Gravitino** | 中（**マルチテーブル tx・view 登録は非対応と明記**） | Simple/Basic/OAuth2/**Kerberos** | ○ Ranger 連携、metalake 階層 |
+| **Unity Catalog OSS** | **読み取り専用・UniForm 経由のみ** | OAuth2/OIDC | 3層権限 |
+| **Databricks Unity Catalog** | Managed Iceberg のみ**読み書き可**、Foreign/UniForm は読取のみ | OAuth2/PAT | UC |
+| **AWS Glue Data Catalog** | 中（**view API・RenameTable なし**、単一階層 namespace、独自 prefix `/catalogs/{c}`） | **SigV4** | ○ **最も強力**（LF 行/列レベル） |
+| **Amazon S3 Tables** | 中（**CTAS 不可**＝stage-create なし、**view 非対応**、purge=false 不可） | SigV4（**OAuth 不可**） | IAM/リソースポリシー |
+| **Cloudflare R2 Data Catalog** | 要検証 | **Bearer API token** | token スコープのみ（粗い） |
+| **Snowflake Open Catalog** | Polaris 準拠 | Polaris 準拠 | Polaris RBAC + Horizon |
+| **Hive Metastore** | REST でない（Thrift） | Kerberos | 弱 |
+| **Hadoop catalog** | REST でない | — | × |
+| **JDBC catalog** | REST でない | DB 認証 | × |
+| **Apache XTable** | **カタログではない**（メタデータ変換器） | — | — |
+
+### 成熟度と現況
+
+| 実装 | 成熟度・現況 |
+|---|---|
+| **Apache Polaris** | **ASF TLP（2026-02）**、contributor 156、年間 2,100 commits（**うち35%はボット、人間 1,356**） |
+| **Project Nessie** | **実質1人保守**（年間の人間コミット245件、うち212が1人。全体の85%はボット）。Dremio 主導だが戦略的地位は低下 |
+| **Lakekeeper** | **v0.13.1 / pre-1.0**、star 1.4k、**実質コア2名**、**公表採用事例なし** |
+| **Apache Gravitino** | **TLP（2025-06）**、v1.3.0、star 3.1k、**Uber/Pinterest 採用** |
+| **Unity Catalog OSS** | LF AI&Data **sandbox**、v0.5.0、API 不安定と明記 |
+| **Databricks Unity Catalog** | **GA**（Iceberg v3 も GA） |
+| **AWS Glue Data Catalog** | GA |
+| **Amazon S3 Tables** | GA（REST は 2025-03〜）、**自動 compaction 標準 ON** |
+| **Cloudflare R2 Data Catalog** | **open beta（GA 未達）** |
+| **Snowflake Open Catalog** | GA。**ただし新規顧客に実質クローズ**（下記） |
+| **Hive Metastore** | 枯れているが漸減。**公式な非推奨宣言は存在しない** |
+| **Hadoop catalog** | **S3 で危険**。2.0 での deprecate 提案あり |
+| **JDBC catalog** | 安定。**Hadoop catalog の推奨代替** |
+| **Apache XTable** | **incubating のまま**。0.3.0-incubating（2025-06）から**13ヶ月リリースなし** |
 
 ---
 

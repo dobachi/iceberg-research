@@ -1,0 +1,33 @@
+/*-- scss:rules --*/
+
+/* 表: 幅を本文に収め、長文セルは折り返す。溢れる場合のみ横スクロール */
+.quarto-container table,
+main table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+  font-size: 0.92rem;
+  border-collapse: collapse;
+}
+
+main table th,
+main table td {
+  /* 長い日本語・URL も折り返す */
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.6;
+  vertical-align: top;
+  padding: 0.45rem 0.6rem;
+}
+
+/* 1列目（実装名・項目名）は折り返しすぎないよう最低幅を確保 */
+main table td:first-child,
+main table th:first-child {
+  min-width: 9rem;
+}
+
+/* コードは表内で折り返す */
+main table code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
