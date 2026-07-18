@@ -76,5 +76,4 @@ format:
     anchor-sections: true
     smooth-scroll: true
     lang: ja
-    mermaid:
-      theme: neutral
+    include-after-body: _includes-mermaid.html

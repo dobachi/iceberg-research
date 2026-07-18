@@ -1,0 +1,28 @@
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  const dark = document.documentElement.getAttribute('data-bs-theme') === 'dark'
+            || matchMedia('(prefers-color-scheme: dark)').matches;
+  mermaid.initialize({
+    securityLevel: 'loose',
+    startOnLoad: false,
+    theme: dark ? 'dark' : 'neutral',
+    flowchart: { useMaxWidth: true, htmlLabels: false, nodeSpacing: 45, rankSpacing: 60 },
+    sequence: { useMaxWidth: true },
+    fontSize: 14
+  });
+  // Quarto は ```mermaid を <pre class="mermaid"><code>…</code></pre> にする
+  document.querySelectorAll('pre.mermaid').forEach(pre => {
+    const code = pre.querySelector('code');
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.textContent = (code ? code.textContent : pre.textContent);
+    pre.replaceWith(div);
+  });
+  try { await mermaid.run(); } catch (e) { console.error('mermaid:', e); }
+</script>
+<style>
+  .mermaid { overflow-x: auto; text-align: center; margin: 1.2em 0; }
+  .mermaid svg { max-width: 100%; height: auto; min-width: 0; }
+  /* 図が縮みすぎて読めなくならないよう、広い画面では原寸に近づける */
+  @media (min-width: 1200px) { .mermaid svg { max-width: 115%; } }
+</style>

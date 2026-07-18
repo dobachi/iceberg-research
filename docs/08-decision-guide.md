@@ -18,16 +18,16 @@ Iceberg が常に最適とは限りません。設計上の性質から不向き
 
 ```mermaid
 flowchart TD
-    S["データ基盤のフォーマットを選ぶ"] --> Q1{"データ規模は？"}
-    Q1 -->|"数GB規模・単一ノードで足りる"| DL["DuckDB + Parquet<br/>または DuckLake"]
+    S["フォーマットを<br/>選ぶ"] --> Q1{"データ規模は？"}
+    Q1 -->|"数GB規模<br/>単一ノードで足りる"| DL["DuckDB + Parquet<br/>または DuckLake"]
     Q1 -->|"大規模"| Q2{"更新の頻度と粒度は？"}
 
-    Q2 -->|"秒〜分単位の連続 upsert<br/>高頻度の小規模更新"| Q3{"Flink 中心か？"}
-    Q3 -->|"はい"| PA["Paimon<br/>（Iceberg 互換メタデータも生成可）"]
+    Q2 -->|"連続 upsert<br/>高頻度の小規模更新"| Q3{"Flink 中心か？"}
+    Q3 -->|"はい"| PA["Paimon<br/>Iceberg 互換<br/>メタデータも生成可"]
     Q3 -->|"いいえ"| PH["Paimon または Hudi"]
 
-    Q2 -->|"バッチ中心<br/>更新は日次〜時間単位"| Q4{"使うエンジンは？"}
-    Q4 -->|"単一プラットフォームで完結<br/>（Databricks や<br/>Snowflake のみ等）"| NA["そのプラットフォームの<br/>ネイティブ形式"]
+    Q2 -->|"バッチ中心<br/>日次〜時間単位"| Q4{"使うエンジンは？"}
+    Q4 -->|"単一プラットフォーム<br/>で完結"| NA["そのプラットフォームの<br/>ネイティブ形式"]
     Q4 -->|"Azure / Fabric 中心"| DE["Delta Lake<br/>（Fabric のネイティブ）"]
     Q4 -->|"複数エンジンで共有したい"| Q5{"AI/ML の非構造データを<br/>同居させるか？"}
     Q5 -->|"はい"| HU["Hudi<br/>（VECTOR/BLOB 型、<br/>Lance 統合）"]
@@ -55,7 +55,7 @@ Iceberg を選んだら、次はカタログです。**フォーマットより�
 
 ```mermaid
 flowchart TD
-    S["Iceberg のカタログを選ぶ"] --> Q1{"セルフホストか<br/>マネージドか？"}
+    S["カタログを選ぶ"] --> Q1{"セルフホストか<br/>マネージドか？"}
 
     Q1 -->|"まず試したい・学びたい"| PO1["Apache Polaris<br/>quickstart は4サービス<br/>外部DB不要"]
 
