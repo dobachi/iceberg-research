@@ -20,6 +20,7 @@
 | Apache Polaris | 1.6.0 | 2026-07-09 | GitHub Releases |
 
 補足:
+
 - **Paimon は GitHub Releases を作成しない**運用（タグと ASF dist のみ）
 - **Hudi は 1.2.0 の後に 0.x 系の保守リリースを継続**: 0.15.1（2026-05-21）、0.14.2（**2026-06-08**）。1.0.0 GA から1年半経った2026年に 0.14 系の保守が必要 = **旧バージョン残留ユーザーが相当数いる**ことの示唆
 - **Iceberg のマイナー間隔は伸長傾向**: 1.8.0（2025-02-13）→ 1.9.0（+約2.5ヶ月）→ 1.10.0（+約4.5ヶ月）→ 1.11.0（**+約8.3ヶ月**）
@@ -112,6 +113,7 @@
 **評価**: 上記の実測値は、「XTable は停滞している」という判断を裏付けます。ただし**プロジェクトは放棄されていません**（最終 push 2026-07-14）。Incubator ステータスページに活動への懸念の明記は**確認できませんでした**。
 
 **対照的に、ベンダー主導の相互運用の方が実際に動いています**:
+
 - Databricks UniForm（GA）
 - Microsoft OneLake のメタデータ仮想化（双方向）
 - Fivetran: Parquet を1回書いて **Iceberg と Delta のメタデータを同時に維持**
@@ -187,6 +189,7 @@ Confluent Tableflow、Fivetran Managed Data Lake Service（**既定で Apache Po
 #### (a) カタログ・インターチェンジ層としては、IRC 仕様が事実上の共通語になりつつある
 
 根拠がここに集中しています:
+
 - Databricks が UC に IRC API を実装（2025-06）
 - GCP の BigLake Metastore が IRC で GA
 - Fivetran が Polaris を既定同梱

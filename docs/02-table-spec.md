@@ -88,6 +88,7 @@ v3 は、v2 までで扱えなかった **新しいデータ型** と、いく�
 - **`write-default`**: フィールド追加**以後**、writer が値を供給しない場合に埋めます
 
 規則:
+
 - 「The `initial-default` is set only when a field is added to an existing schema.」
 - 「If the write default for a **required** field is not set, the writer **must fail**.」
 - **`unknown`, `variant`, `geometry`, `geography` は全て null default 必須**（非 null は invalid）
@@ -113,6 +114,7 @@ Partition Field / Sort Field JSON に **`source-ids`**（JSON int リスト）�
 **v3 では必須で、オプトインではありません。** 1.10.0 のリリースノート「remove update to enable row lineage as it is **always on for V3 table**」がこれを裏付けます。
 
 2つの行レベルフィールド:
+
 - **`_row_id`**（field id 2147483540）: テーブル内で一意な long。行が最初に追加された時に**継承で割り当て**
 - **`_last_updated_sequence_number`**（field id 2147483539）: 最後に更新したコミットのシーケンス番号
 
@@ -133,6 +135,7 @@ Partition Field / Sort Field JSON に **`source-ids`**（JSON int リスト）�
 v3 化で `next-row-id` は 0 に初期化され、既存スナップショットは変更されず `first-row-id` は未設定のままです。→ **アップグレード前のスナップショットには row ID が無く、`_row_id` は全行 null として読まれます。** 後付けできません。
 
 行を別ファイルに移動する場合（compaction 等）の規則:
+
 1. 既存の非 null `_row_id` をコピー
 2. 変更していれば `_last_updated_sequence_number` を null に
 3. 変更していなければ既存値をコピー
@@ -205,6 +208,7 @@ Puffin の **`deletion-vector-v1`** blob 型で格納されます。
 - データファイル削除時は delete manifest から対応 DV も削除必須。ただし **Puffin ファイル自体の書き直しは不要**。
 
 **シリアライズ形式**:
+
 - 4バイト big-endian: ベクトル＋マジックバイトの長さ
 - 4バイトマジック: **`D1 D3 39 64`**
 - Roaring bitmap "portable" format（**little-endian**）
@@ -222,6 +226,7 @@ Puffin の **`deletion-vector-v1`** blob 型で格納されます。
 | **Equality delete** | データシーケンス番号が **厳密に小さい（strictly less than）** ＋ パーティション一致 **または delete 側の spec が unpartitioned** |
 
 **2つの特例**:
+
 1. 「Equality delete files stored with an **unpartitioned spec are applied as global deletes**.」— **グローバル equality delete は全データファイルに対して照合が必要**になります。MoR の最悪ケースです。
 2. 「Position deletes (vectors and files) **must be applied to data files from the same commit**, when the data and delete file data sequence numbers are **equal**.」— 同一コミット内で追加した行を削除できるようにするため。
 
@@ -273,6 +278,7 @@ bounds のバイト長から書き込み時の型を推論する必要があり�
 ### 列プロジェクションの解決順序
 
 データファイルに field id が無い場合:
+
 1. identity transform のパーティションメタデータから値を返す（**Hive テーブルのメタデータのみの移行**を可能にする）
 2. `schema.name-mapping.default` で field id をマップ
 3. `initial-default` があればそれを返す
@@ -296,6 +302,7 @@ bounds のバイト長から書き込み時の型を推論する必要があり�
 | `void` | 常に `null` | 任意 | ソース型 or `int` |
 
 細部（間違えやすい点）:
+
 - **全 transform は `null` 入力に対し `null` を返す**こと
 - `day` の結果型は `date`。ただし「Readers must also **accept `int` values** for the `day` transform」（後方互換）
 - **bucket のハッシュは 32-bit Murmur3、x86 variant、seed=0**。`bucket_N(x) = (murmur3_x86_32_hash(x) & Integer.MAX_VALUE) % N`（符号ビットを捨てて正値化）

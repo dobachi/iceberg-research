@@ -103,6 +103,7 @@ s3://warehouse/db/events/
 ### コミットの実装
 
 **Metastore Tables**（推奨）:
+
 1. 現メタデータを基に新メタデータを作成
 2. `<V+1>-<random-uuid>.metadata.json` に書き出し
 3. メタストアに **check-and-put** でポインタ swap を要求 → 成功なら commit 成立、失敗なら 1 に戻る
@@ -179,6 +180,7 @@ manifest list の各エントリは `field_summary`（`contains_null` / `contain
 「Scan predicates are also used to filter data and delete files using **column bounds and counts** that are stored by field id in manifests.」
 
 **段4: delete ファイルのプルーニング**
+
 > **The same filter logic can be used for both data and delete files** because both store metrics of the rows either inserted or deleted. If metrics show that a delete file has no rows that match a scan predicate, it may be **ignored just as a data file would be**.
 
 具体例（仕様より）: 「if `file_a` has rows with `id` between 1 and 10 and a delete file contains rows with `id` between 1 and 4, a scan for `id = 9` **may ignore the delete file**」— **delete ファイルもプルーニング対象**です。MoR の性能を理解する上で重要な点です。

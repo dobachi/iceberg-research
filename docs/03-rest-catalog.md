@@ -347,10 +347,13 @@ security:
 
 > summary: "Get a token using an OAuth2 flow (**DEPRECATED for REMOVAL**)"
 >
+
 > The `oauth/tokens` endpoint is **DEPRECATED for REMOVAL**. It is _not_ recommended to implement this endpoint, unless you are fully aware of the potential security implications.
 >
+
 > All clients are encouraged to explicitly set the configuration property `oauth2-server-uri` to the correct OAuth endpoint.
 >
+
 > **Deprecated since Iceberg (Java) 1.6.0. The endpoint and related types will be removed from this spec in Iceberg (Java) 2.0.**
 
 **非推奨の理由**（[Issue #10537](https://github.com/apache/iceberg/issues/10537) "Security improvements in the Iceberg REST specification"）:
@@ -466,6 +469,7 @@ X-Iceberg-Access-Delegation: vended-credentials,remote-signing
 | クレデンシャル漏洩でバケット全体が危険 | prefix スコープ + 期限付き。remote signing ならクライアントは credential を**そもそも持たない** |
 
 仕様が裏付ける設計上の根拠:
+
 - `StorageCredential.prefix` + longest-prefix-wins → **最小権限をロケーション粒度で実現**
 - `s3.session-token` の存在 → **短命の STS セッション credential** が前提
 - `loadCredentials` の `?planId=` → **scan planning で払い出したプラン専用に credential をスコープできる**
@@ -492,6 +496,7 @@ S3 remote signing（`/sign`）はさらに古く 1.3 系から存在し、**vend
 
 > **All REST clients should first call this route** to get catalog configuration properties from the server…
 >
+
 > - **defaults** - properties that should be used as default configuration; applied **before** client configuration
 > - **overrides** - properties that should be used to override client configuration; applied **after** defaults and client configuration
 
@@ -571,11 +576,13 @@ prefix:
 ```
 
 **確認できた事実**:
+
 - `prefix` は path parameter で `required: true`（パス上は必ず何かが入る）だが description は "An optional prefix"
 - `/v1/config` **だけ**が `prefix` を取らない。これが「まず config を叩け」の理由でもある
 - `/v1/config` は `?warehouse=` を受け取り、404 は「Warehouse provided in the `warehouse` query parameter is not found」
 
 **典型的なマルチテナントのフロー**（仕様の構造から強く支持される推測）:
+
 1. クライアントが `GET /v1/config?warehouse=my_warehouse` を呼ぶ
 2. サーバが `overrides` に `prefix` を入れて返す（例: `{"overrides": {"prefix": "ws/tenant-a/wh-123"}}`）
 3. 以降クライアントは全リクエストを `/v1/ws/tenant-a/wh-123/namespaces/...` に送る
@@ -611,6 +618,7 @@ prefix:
 これは [06-operations.md](06-operations.md) で扱う「メタデータが肥大するとクライアント側 driver が死ぬ」という構造的問題への**プロトコルレベルの解**です。従来は運用（`expire_snapshots` 等）で対処するしかありませんでした。
 
 1.11.0 はさらに以下も追加しています:
+
 - **incremental scans** への拡張（#14661、Structured Streaming 向け）
 - **メタデータテーブル**（`history`, `snapshots` 等）への拡張（#14881）
 - **per-table override**（#15572）— 個別テーブルがカタログレベルの mode をオプトアウト可能
@@ -636,6 +644,7 @@ POST /plan
 ```
 
 仕様の規定:
+
 - **「A "cancelled" status is considered invalid for this endpoint」**（`POST /plan` のレスポンスとして）
 - 「Responses that include a `plan-id` indicate that the service is **holding state or performing work for the client**」
 - **「Cancellation is not necessary after fetchScanTasks has been used to fetch scan tasks for each plan task.」**
@@ -671,6 +680,7 @@ POST /plan
 **確認済み**: Iceberg Java 1.11.0（クライアント実装 + Spark 統合）
 
 **未確認 / 二次情報**:
+
 - DuckDB (`duckdb-iceberg`) は 2026年5月時点で未対応（[Issue #977](https://github.com/duckdb/duckdb-iceberg/issues/977) がオープン）
 - **PyIceberg は 0.11.0 で REST scan planning に対応**（**同期のみ**、async は将来）→ [05-engine-support.md](05-engine-support.md#pyiceberg)
 
@@ -753,6 +763,7 @@ POST /plan
 ## 出典
 
 **一次情報（Apache Iceberg 公式）**
+
 - OpenAPI 仕様本体: https://github.com/apache/iceberg/blob/main/open-api/rest-catalog-open-api.yaml
 - Swagger UI: https://iceberg.apache.org/rest-catalog-spec/
 - open-api README (RCK): https://github.com/apache/iceberg/blob/main/open-api/README.md

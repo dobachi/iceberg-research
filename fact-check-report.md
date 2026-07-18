@@ -26,6 +26,7 @@
 ### 1. 「`format-version=4` は設定できない」— **誤り**
 
 **初版の記述**:
+
 > 2026年7月時点で `format-version=4` は設定できません。
 
 **実際**（`TableMetadata.java` をリリースタグごとに実測）:
@@ -55,6 +56,7 @@ static final int MIN_FORMAT_VERSION_OPTIONAL_LOCATION = 4;
 ### 2. 健全性シグナルのボット混入 — **結論に影響**
 
 **初版の記述**:
+
 > Nessie は直近52週 1,630 コミット、contributor 79名で**活発に開発継続中**
 
 **実際**（GitHub API で内訳を実測）:
@@ -71,6 +73,7 @@ static final int MIN_FORMAT_VERSION_OPTIONAL_LOCATION = 4;
 **ボット比率が 0.4%〜85% と2桁違うため、生コミット数の横並び比較が成立していませんでした。**
 
 壊れていた結論:
+
 1. **Nessie の「活発」は幻**。人間コミット 245 件、しかも実質1人（`snazy` が 212、残り全員で 33）。ユニーク作者 22人（Iceberg 270 の 1/12）
 2. **Polaris と Iceberg の順位が逆転**。生 2,100 > 1,696 だが、人間 1,356 < 1,387
 3. **Paimon の優位を過小評価**。生 1.34倍 → 人間 **1.63倍**
@@ -114,6 +117,7 @@ static final int MIN_FORMAT_VERSION_OPTIONAL_LOCATION = 4;
 | `paimon.apache.org/docs/master/iceberg/overview/` | **404**。`docs/1.4/` なら 200 | バージョン固定 URL に変更 |
 
 **その他**:
+
 - `prestodb.io`（403）: 適切な UA なら 200。ボット遮断であり生きている
 - `bigdatawire.com`（403 + リダイレクト）: **ドメインが `hpcwire.com/bigdatawire/` に移転**。移転先に更新済み（ニュースサイトのため 403 は継続）
 - oreilly conferences PDF: Puppeteer ではタイムアウトしたが curl では 200（低速なだけ）
@@ -179,6 +183,7 @@ static final int MIN_FORMAT_VERSION_OPTIONAL_LOCATION = 4;
 - **B-13: 「未採択」と「実装が受け付けない」は別物** — 仕様から実装の挙動を推論しない
 
 チェックリストにも追加:
+
 - [ ] 実測値の内訳を見たか？（ボット比率、指標定義の統一）
 - [ ] 仕様の記述から実装の挙動を推論していないか？
 

@@ -55,10 +55,12 @@
 | **2026-06-17** | docs 最終更新。**Preview/Beta バナーなし**（Databricks は Preview 機能に明示ラベルを付ける慣習があり、その不在は GA と整合） |
 
 **サブ機能**:
+
 - 対応: deletion vectors / VARIANT / row lineage
 - **【明示的非対応】**: 「Defaults, including write defaults and initial defaults, aren't supported」、**unknown 型**、**ナノ秒精度 timestamp**、**multi-argument transforms**
 
 **書き込みの非対称性**（重要）:
+
 - **Managed Iceberg のみ書き込み可**（外部エンジン Spark/Flink/Trino/Kafka からも可）
 - **Foreign Iceberg は Databricks 内で読み取り専用**、**credential vending 非対応**、手動 `REFRESH FOREIGN TABLE` が必要
 - **パーティション進化は外部エンジン経由でのみ GA。Databricks SQL 経由では非対応**
@@ -79,6 +81,7 @@
 | **2026-05-26** | [**外部エンジン write が GA**](https://docs.snowflake.com/en/release-notes/2026/other/2026-05-26-tables-iceberg-query-using-external-query-engine-snowflake-horizon-writes-ga) — 「read and write to Snowflake-managed Iceberg **v2 and v3** tables」← **ここで v3 制約が解消** |
 
 現行 docs（最終根拠）:
+
 > You can **read and write** to Snowflake-managed Iceberg **v2 and v3** tables from external engines through the Horizon Iceberg REST Catalog API
 
 > **教訓**: **Snowflake のリリースノートを現況の根拠に使わないこと。** 仕様上、後から更新されることはなく、その時点の記述がそのまま残り続けます。→ [99-methodology.md](99-methodology.md)
@@ -145,6 +148,7 @@
   throw new UnsupportedOperationException(
       "Cannot add column %s since setting default values in Spark is currently unsupported");
   ```
+
 - 1.10.0 に「Throw unsupported exception for ADD COLUMN with default value (#13464)」
 
 → **リリースノートの文言だけを読むと誤読を招きます。DDL での default 設定は依然として不可です。**
@@ -216,6 +220,7 @@ UPSERT は equality delete ベース（`write.upsert.enabled`、v2+）。exactly
 ### v3 アップグレード時の制約
 
 `flink-writes.md`（**【確認】**）:
+
 > **Table Format Version upgrade**: Dynamic sink does not support upgrading a table with dynamic records. **The job should not be running while the V2 to V3 upgrade is in progress.**
 
 ### ナノ秒 timestamp の非対称
@@ -270,6 +275,7 @@ v1/v2 の読み書きは GA（MERGE、パーティション進化、スキーマ
 - **row lineage は読み取り専用**
 
 **v3**: 部分的で、大半が未リリース。docs が認めるのは **default column values のみ**（metadata-only、`initial-default` を読み取り時に注入）。残りは [prestodb/presto#27198](https://github.com/prestodb/presto/issues/27198)（**Open**、2026-06-23 更新）で進行中:
+
 - **M1（2026年6月）**: API を 1.10.0 へ、DV **read**（Velox マージ済み、Prestissimo 保留）、default-value read マージ済み
 - **M2（目標 2026年9月）**: multi-arg transforms、**VARIANT read**、UNKNOWN 型、ナノ秒 timestamp → **VARIANT は今日の Presto では使えません**
 
@@ -392,6 +398,7 @@ pyiceberg-core, datafusion, gcp-auth, entra-auth
 released 0.11.1 のソース全体を grep しても該当キーはなく、`S3_FORCE_VIRTUAL_ADDRESSING = "s3.force-virtual-addressing"` のみ実在します。`s3.path-style-access` は **Java 版 Iceberg / Spark 側のキー**であり、PyIceberg に書いても**エラーにならず黙って無視されます**（プロパティは単なる dict 参照のため）。
 
 さらに重要なのは、**MinIO 等で path-style を使いたい場合、何も設定しなくてよい**という点です:
+
 - `_initialize_s3_fs` は**プロパティが明示指定された時のみ** `force_virtual_addressing` を PyArrow へ渡す
 - PyArrow の既定は `False` で、意味は「If false, then virtual addressing is only enabled if `endpoint_override` is empty」
 - → **`s3.endpoint` を設定した時点で自動的に path-style になります**
@@ -479,6 +486,7 @@ engine v3 で GA。INSERT/UPDATE/DELETE/**MERGE**、OPTIMIZE、VACUUM。DV + row
 ## 出典
 
 **Apache Iceberg**
+
 - Multi-engine support: https://raw.githubusercontent.com/apache/iceberg/main/site/docs/multi-engine-support.md
 - Releases: https://iceberg.apache.org/releases/ / https://github.com/apache/iceberg/releases/tag/apache-iceberg-1.11.0
 - Spark docs（生ソース）: `https://raw.githubusercontent.com/apache/iceberg/main/docs/docs/spark-{writes,ddl,configuration,queries,procedures}.md`
@@ -487,6 +495,7 @@ engine v3 で GA。INSERT/UPDATE/DELETE/**MERGE**、OPTIMIZE、VACUUM。DV + row
 - PR #14197（Flink DV write）、#14148（Flink row lineage read）、#15265（Flink VARIANT）
 
 **PyIceberg**
+
 - PyPI JSON API: https://pypi.org/pypi/pyiceberg/json
 - 0.11.0 release blog: https://iceberg.apache.org/blog/apache-iceberg-python-0.11.0-release/
 - Configuration: https://py.iceberg.apache.org/configuration/
@@ -494,6 +503,7 @@ engine v3 で GA。INSERT/UPDATE/DELETE/**MERGE**、OPTIMIZE、VACUUM。DV + row
 - Issue #1551（V3 write）: https://github.com/apache/iceberg-python/issues/1551
 
 **エンジン各社**
+
 - Trino: https://trino.io/docs/current/connector/iceberg.html / https://raw.githubusercontent.com/trinodb/trino/master/docs/src/main/sphinx/connector/iceberg.md
 - Presto: https://prestodb.io/docs/current/connector/iceberg.html / https://github.com/prestodb/presto/issues/27198
 - Snowflake: https://docs.snowflake.com/en/user-guide/tables-iceberg-access-using-external-query-engine-snowflake-horizon / release notes 2026-05-07, 2026-05-26

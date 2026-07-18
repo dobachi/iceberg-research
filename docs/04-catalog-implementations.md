@@ -95,14 +95,17 @@
 
 > **卒業日は公式ソース3つが3つとも食い違っています**（実測）:
 >
+
 > | ソース | 日付 |
 > |---|---|
 > | [Polaris 公式ブログ](https://polaris.apache.org/blog/2026/02/19/apache-polaris-graduates-to-top-level-project/) | **2026-02-19** |
 > | [Incubator ステータスページ](https://incubator.apache.org/projects/polaris.html) | **2026-02-15** |
 > | [Incubator プロジェクト一覧](https://incubator.apache.org/projects/) | **2026-02-18** |
 >
+
 > 後者2つは**同じ incubator.apache.org 内での自己矛盾**です。02-18 が ASF 理事会の議決日、02-19 がプロジェクト側の告知日である可能性が高いと思われますが、**board minutes を確認していないため断定できません**。本報告書は日付を1つに断定せず、食い違いの存在を事実として記します。
 >
+
 > なおステータスページは「2026-02-15 Graduation as TLP.」と**確定形で記載**しており、*projected*（予定）の但し書きは**ありません**（ページ全文を検索して 0 件）。
 
 ### Project Nessie — 「Polaris に統合されて廃止」は実現していない
@@ -151,6 +154,7 @@ Javadoc が「atomic rename を要求」「renameTable は未サポート」と�
 Hudi/Delta/Iceberg 間の**メタデータ変換層**です。CoW/read-optimized のみ対応（Hudi log file・Delta deletion vector は未反映）。
 
 **実測で明確に停滞**しています:
+
 - 最新リリース **0.3.0-incubating = 2025-06-04**（**13ヶ月以上リリースなし**）
 - コミット: 直近90日 **11件** / 365日 **42件**（うち6件はボット。人間は36件。Iceberg は人間 1,387件）
 - Incubation 入りは 2024-02-11、**2026年7月時点でまだ incubating**（約2年5ヶ月）
@@ -163,8 +167,10 @@ Hudi/Delta/Iceberg 間の**メタデータ変換層**です。CoW/read-optimized
 
 > Customers who **haven't previously created a Snowflake Open Catalog account can't sign up for their first Open Catalog account**.
 >
+
 > **New customers should use Snowflake Horizon Catalog** for Apache Iceberg™ tables and multi-engine interoperability with Iceberg.
 >
+
 > **Existing** Snowflake Open Catalog customers who already have at least one Open Catalog account **can continue using Open Catalog and can create additional Open Catalog accounts** if necessary.
 
 **正式な deprecation ではありません**（docs に deprecation/EOL の語はなく、既存顧客の継続利用と追加アカウント作成を明示的に許可）。しかし新規サインアップは**できません**。
@@ -255,6 +261,7 @@ TOKEN=$(curl --fail-with-body -s \
 **「本番非推奨」の正確な扱い** — ここは訂正が必要です。しばしば「公式が本番使用を禁止している」と言われますが、**README を直接確認した限り、そのような明示的な免責文は存在しません（未確認）**。よく引用される「integration tests will delete data…」は **RCK（統合テスト実行）側の警告**であり、fixture イメージへの本番禁止表明とは別物です。
 
 ただし**テスト用途であることを示す状態証拠は強固**です:
+
 - README タイトル「Iceberg REST Catalog Adapter **Test Fixture**」
 - ソース配置が `open-api/src/**testFixtures**/java/...`
 - **既定がインメモリ SQLite JdbcCatalog**（再起動で全メタデータ消失）

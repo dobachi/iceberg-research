@@ -112,6 +112,7 @@
 
 > **運用上の罠**: 「**ブランチやタグから参照されているスナップショットは削除されません。** デフォルトではブランチとタグは決して expire しませんが、`history.expire.max-ref-age-ms` で変更できます。**`main` ブランチは決して expire しません。**」
 >
+
 > → **タグを1つ付けただけで、そのスナップショットと依存ファイルが無期限に残ります。** Amazon S3 Tables ではこれがさらに深刻な挙動になります（[C-1](#c-1-amazon-s3-tables)）。
 
 ### A-4. `remove_orphan_files` ※ 最も危険な操作
@@ -127,6 +128,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 > **Iceberg はどのファイルを削除すべきか判断する際にパスの文字列表現を使う。一部のファイルシステムではパスが時間とともに変化しうるが、それでも同じファイルを表す。例えば HDFS クラスタの authority を変更した場合、作成時に使われた古いパス URL はどれも現在のリスティングに現れるものと一致しない。これは RemoveOrphanFiles を実行した際にデータ損失につながる。**
 
 **実務結論**:
+
 - **必ず `dry_run => true` で先に確認する**（公式の最初の例がこれです）
 - **`older_than` をデフォルトの3日より短くしない。** 特に長時間バッチや Flink の長時間チェックポイントがある環境では、最長書き込み時間より確実に長く取る
 - **`prefix_mismatch_mode` のデフォルトは `ERROR`（例外送出）であり、これは安全側の設計です。** これを `DELETE` にするのは、スキーム/authority の不一致が本当に同一ファイルを指すと確証がある場合のみ。**安易な `DELETE` 指定はまさに上記のデータ損失シナリオそのものです**
@@ -148,6 +150,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 ### A-5. `rewrite_position_delete_files` と v3 deletion vector
 
 **2つの目的**:
+
 - **Minor Compaction**: 小さな position delete ファイルを大きなものに結合
 - **Remove Dangling Deletes**: 「`rewrite_data_files` の後、書き換えられたデータファイルを指す position delete レコードは常に削除対象としてマークされるとは限らず、テーブルの生存スナップショットメタデータに追跡され続けることがある。**これが 'dangling delete' 問題として知られる**」
 
@@ -156,6 +159,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 #### v3 でどう変わるか
 
 [02-table-spec.md](02-table-spec.md#dv-が改善したこと) で見た通り、v3 では:
+
 - position delete ファイルの新規追加が**禁止**
 - 「1データファイル = 高々1つの DV」が spec レベルで保証
 - DV は既存 position delete を置き換える
@@ -163,6 +167,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 → **`rewrite_position_delete_files` の存在意義が構造的に縮小します。** 小さな delete ファイルが際限なく積み上がるという v2 の主要な病理が消え、「minor compaction」の対象そのものが生まれません。
 
 **ただし完全には消えません**:
+
 1. **Puffin ファイル自体の書き直しは spec 上不要**なので、「参照されない DV blob を含む Puffin ファイル」が残りえます → `remove_orphan_files` の領分
 2. **v2 テーブルには依然として必要**です。v2→v3 アップグレード後も既存の position delete ファイルは有効なまま残るため、移行期は両方の考慮が必要
 
@@ -210,6 +215,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 | `write.spark.fanout.enabled` | false | **メモリ使用量が増える** |
 
 **metrics モードの定義**:
+
 - `none`: 永続化しない
 - `counts`: カウントのみ
 - `truncate(length)`: カウント + 切り詰めた境界値。**切り詰めは string と binary にのみ適用**
@@ -244,6 +250,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 
 > **矛盾の指摘**: `configuration.md` は `write.distribution-mode` を「not set, see engines for specific defaults」とする一方、`spark-writes.md` は「**Iceberg 1.2.0 以降、`hash` が新しいデフォルト**」と記述します。
 >
+
 > これは矛盾ではなく**階層の違い**です — テーブルプロパティとしては未設定で、**Spark エンジンが実行時に hash を要求する**という構造です。したがって**他エンジン（Flink 等）では挙動が異なりえます**。また「**Spark は 3.5.0 より前では CTAS/RTAS で distribution mode を尊重しない**」という重要な例外も明記されています。
 
 ---
@@ -277,6 +284,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 **実務上の帰結: compaction ジョブ自体が最も競合を起こしやすいライタです。** 大きなパーティションを書き換える compaction は長時間データファイルを保持し、その間の並行書き込みと衝突します。
 
 対策:
+
 - `partial-progress.enabled=true` + `partial-progress.max-commits` で小さく刻んでコミットし、1コミットあたりの競合窓を狭める
 - `max-file-group-size-bytes`（既定 100GB）を下げ、`where` 句で書き込みが起きていないパーティションに限定する
 
@@ -285,6 +293,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 ### 4. Orphan files
 
 2つの独立した機序があります:
+
 - **タスク/ジョブ失敗**: 書き込み順序（データ先、メタデータ後）から構造的に不可避（A-4）
 - **untracked metadata**: `previous-versions-max` を溢れた metadata JSON（A-6）
 
@@ -323,10 +332,12 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 **`expire_snapshots` / `remove_orphan_files` の `stream_results` オプションが「Spark driver の OOM を防ぐため true 推奨」と明記されているのは、この問題が実在することの公式な証左です。**
 
 **server-side scan planning はこれへのプロトコルレベルの解**です。仕様・実装ともに存在します（[03-rest-catalog.md](03-rest-catalog.md#7-サーバサイド-scan-planning) 参照）:
+
 - 仕様: 1.7.0（2024-11-08、PR #9695）
 - 実装: **1.11.0（2026-05-19、PR #13400 + Spark 統合 #14963）**
 
 1.11.0 リリースブログ:
+
 > **以前は、全てのクライアントがどのファイルを読むか判断するために manifest list と manifest を自分で取得しなければならなかった。server-side planning により、クライアントは関連する scan task のみを受け取り、driver のメモリ圧迫を軽減し、クエリエンジンに透過的なサーバサイド最適化を可能にする。**
 
 ただし**カタログサーバ側の実装が必須**であり、その最適化の質はカタログ実装に依存します。
@@ -353,6 +364,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 #### 公式な推奨値が「存在しない」もの（未確認）
 
 以下は `partitioning.md`、`performance.md`、`configuration.md` を確認しましたが**見つかりませんでした**:
+
 - **1パーティションあたりの推奨データ量**
 - **1テーブルあたりの推奨パーティション数上限**
 - **manifest あたりの推奨エントリ数**
@@ -434,6 +446,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 
 > Snapshot management は、`metadata.json` ファイルまたは `ALTER TABLE SET TBLPROPERTIES` で設定した retention 値を**サポートしない**。以下のいずれかの条件が存在する場合、**snapshot management はテーブル全体で失敗し、Amazon S3 はスナップショットを一切 expire も削除もしない**:
 >
+
 > - **ユーザー定義のタグまたはブランチ** — テーブルにユーザー定義のタグやブランチが存在する場合、snapshot management はテーブル全体で失敗する。**これは、そのタグやブランチの retention 期間が短くても適用される。**
 > - **Iceberg snapshot retention テーブルプロパティ** — `history.expire.max-snapshot-age-ms` または `history.expire.min-snapshots-to-keep` がテーブルプロパティとして設定されている場合、**設定値に関わらず** snapshot management はテーブル全体で失敗する。
 
@@ -455,6 +468,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 **対象**: **Unity Catalog managed tables（Delta Lake および Iceberg）**
 
 **限界**（公式に「サポートしない」と記載）:
+
 - **外部テーブル** — 対象外
 - **OpenSharing recipient としてロードされたテーブル** — 対象外
 - **「Predictive Optimization が実行する OPTIMIZE は ZORDER 操作を実行しない」** — S3 Tables が z-order 戦略を提供するのと対照的
@@ -482,6 +496,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 ## 出典
 
 **Apache Iceberg 公式（生ソース）**
+
 - Spark Procedures: https://raw.githubusercontent.com/apache/iceberg/main/docs/docs/spark-procedures.md
 - Configuration: https://raw.githubusercontent.com/apache/iceberg/main/docs/docs/configuration.md
 - Maintenance: https://raw.githubusercontent.com/apache/iceberg/main/docs/docs/maintenance.md
@@ -492,11 +507,13 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 - Remote scan planning: [PR #13400](https://github.com/apache/iceberg/pull/13400)
 
 **AWS**
+
 - [Maintenance for tables (S3 Tables)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-tables-maintenance.html)
 - [Considerations and limitations](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-tables-considerations.html)
 - [PutTableMaintenanceConfiguration API](https://docs.aws.amazon.com/AmazonS3/latest/API/API_s3Buckets_PutTableMaintenanceConfiguration.html)
 
 **Databricks**
+
 - [Predictive optimization](https://docs.databricks.com/aws/en/optimizations/predictive-optimization)
 
 **採用しなかった情報**: 「Spark（Iceberg 1.11+）が Scan API をサポート」等の第三者ブログ（Medium/Dremio、DEV Community、Substack）の記述は、公式 docs で裏付けが取れなかったため採用していません。

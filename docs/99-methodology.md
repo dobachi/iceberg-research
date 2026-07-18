@@ -60,6 +60,7 @@
 **Spark の default values** が典型例です。
 
 1.11.0 のリリースノートに「Add schema conversion support for default values (#14407)」とあります。しかし:
+
 - 実タイトルは **"Spark 4.0: Add schema conversion support for default values"**
 - 変更は `TypeToSparkType.java` のみ = **スキーマ変換だけ**
 - 同じ 1.11.0 タグのコードに `throw new UnsupportedOperationException("Cannot add column %s since setting default values in Spark is currently unsupported")` が**実在**
@@ -71,6 +72,7 @@
 **PyIceberg** の `py.iceberg.apache.org` には**バージョンセレクタ/バナーがなく**、どのバージョンに対応するか明示されません（＝ `main` 追従の可能性）。
 
 そこで本調査は**リリースタグ `pyiceberg-0.11.1` のソースを直接参照して照合**しました。その結果、docs だけでは分からない精度で確定できました:
+
 - `table.maintenance` の実在（`table/__init__.py` L1129、`table/maintenance.py`）
 - **v3 は「型定義は存在するが `model_dump_json` が `NotImplementedError` を投げる＝書き込み不可」**
 
