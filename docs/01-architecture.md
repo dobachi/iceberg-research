@@ -14,7 +14,7 @@ Hive テーブルとの根本的な違いは、仕様の Overview に明記さ�
 
 > This table format tracks **individual data files** in a table instead of directories.
 
-**ディレクトリではなくファイル単位で追跡する** — これがほぼすべての設計上の帰結を生みます。ディレクトリリスティングに依存しないため、オブジェクトストレージ上で正しく・速く動作し、パーティションの物理レイアウトを変更してもクエリを書き換えずに済みます。
+**ディレクトリではなくファイル単位で追跡する** — ここからほぼすべての設計上の帰結が導かれます。ディレクトリリスティングに依存しないため、オブジェクトストレージ上でも正確かつ高速に動作し、パーティションの物理レイアウトを変えてもクエリの書き換えは不要です。
 
 ---
 
@@ -47,7 +47,7 @@ catalog                       … テーブル → 現 metadata ファイルへ�
 ### マニフェストの制約
 
 - 「A manifest may store either data files or delete files, **but not both** because manifests that contain delete files are **scanned first** during job planning.」— delete を先に読む必要があるため、分離されています。
-- 「A manifest stores files for a **single partition spec**.」— スペックが変わると新しい manifest に書かれます。manifest の Avro スキーマがパーティションスペックに依存するためです。
+- 「A manifest stores files for a **single partition spec**.」— manifest の Avro スキーマがパーティションスペックに依存するため、スペックが変わればファイルは別の manifest に書かれます。
 - 「All columns must be written to data files even if they introduce redundancy with metadata（例: identity パーティション列）… provides a **backup in case of corruption or bugs in the metadata layer**.」— メタデータ層のバグに対する保険として、冗長でも全列を書きます。
 
 ---
@@ -96,7 +96,7 @@ catalog                       … テーブル → 現 metadata ファイルへ�
 
 > Inheriting the sequence number from manifest metadata allows **writing a new manifest once and reusing it in commit retries**. To change a sequence number for a retry, **only the manifest list must be rewritten**.
 
-新規エントリは `null` で書かれ、読み取り時に manifest list の値で置換されます。これにより**リトライのコストを manifest list の書き直しだけに抑えられます**。継承は status=1 (ADDED) のときのみで、EXISTING/DELETED は明示値が必須です。
+新規エントリは `null` で書かれ、読み取り時に manifest list の値へ置き換わります。おかげで**リトライのコストは manifest list の書き直しだけで済みます**。継承が効くのは status=1 (ADDED) のときに限られ、EXISTING/DELETED では明示値が必須です。
 
 `sequence_number`（データシーケンス番号 = 内容の相対的な古さ）と `file_sequence_number`（追加時のスナップショット番号）は別物です。仕様は「**The file sequence number can't be used for pruning delete files**」と明記しています。
 
@@ -153,7 +153,7 @@ Puffin は統計とインデックスのための blob コンテナ形式です�
 
 > Statistics are informational. A reader can **choose to ignore** statistics information. **Statistics support is not required to read the table correctly.**
 
-パーティション統計も同様に「not required for reading or planning」です。**正しさには不要で、速度のためだけに存在します。** ただしパーティション統計は「**must be registered in the table metadata file** to be considered as a valid statistics file for the reader」という登録要件があります。
+パーティション統計も同様に「not required for reading or planning」です。**正しさには不要で、速度のためだけに存在します。** ただし読み手が有効な統計ファイルとして扱うには「**must be registered in the table metadata file** to be considered as a valid statistics file for the reader」という登録が求められます。
 
 ---
 

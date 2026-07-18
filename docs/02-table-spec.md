@@ -16,13 +16,13 @@
 | v1 | Analytic Data Tables | 採択済み |
 | v2 | Row-level Deletes | 採択済み。**現在のデフォルト** |
 | v3 | Extended Types and Capabilities | **採択済み**（1.8.0〜段階的に実装） |
-| v4 | Metadata Structure and Representation | **仕様は未採択**。ただし **Java 実装は 1.10.0+ で `format-version=4` を受理**（PyIceberg は不可）。既定は 2 |
+| v4 | Metadata Structure and Representation | **仕様は未採択**。ただし **Java 実装は 1.10.0+ で `format-version=4` を受け付ける**（PyIceberg は不可）。既定は 2 |
 
 ### バージョニングの原則
 
 > The format version number is incremented when new features are added that will break **forward-compatibility** — that is, when **older readers would not read newer table features correctly**.
 
-前方互換性が壊れるときにだけ上がります。「新機能が入ったから上げる」ではありません。
+前方互換性が壊れるときにだけ上がります。「新機能が入ったから上げる」わけではありません。
 
 ---
 
@@ -78,8 +78,8 @@
 
 ### default values
 
-- **`initial-default`**: フィールド追加**以前**に書かれた全レコードの値を埋める → **データファイルを書き換えずに SQL の DEFAULT 挙動を実現**します
-- **`write-default`**: フィールド追加**以後**、writer が値を供給しない場合に埋める
+- **`initial-default`**: フィールド追加**以前**に書かれた全レコードの値を埋めます → **データファイルを書き換えずに SQL の DEFAULT 挙動を実現**します
+- **`write-default`**: フィールド追加**以後**、writer が値を供給しない場合に埋めます
 
 規則:
 - 「The `initial-default` is set only when a field is added to an existing schema.」
@@ -347,7 +347,7 @@ bounds のバイト長から書き込み時の型を推論する必要があり�
 
 仕様本文は「**Version 4 is under active development and has not been formally adopted.**」と明記しています。**仕様としては未採択です。**
 
-**しかし、参照実装は既に v4 を受理します。** ここを混同しないでください。
+**しかし、参照実装は既に v4 を受け付けます。** ここを取り違えないでください。
 
 | 実装 | `format-version=4` | 根拠（実測） |
 |---|---|---|
@@ -408,7 +408,7 @@ static final int MIN_FORMAT_VERSION_OPTIONAL_LOCATION = 4;   // ← v4 機能（
 
 **v4 を前提にした設計判断は時期尚早です。** 公式マイルストーンは2提案のみ、期日なし。ブログ等で語られるタイムライン（2027年前後）は**公式には裏取りできません**。
 
-**ただし「作れないから安全」ではありません。** 上記のとおり Iceberg Java 1.10.0+ は `format-version=4` を受理します。**仕様が採択前に変更されれば、作った v4 テーブルが読めなくなる可能性があります。** 明示的に避ける判断が必要です。
+**ただし「作れないから安全」ではありません。** 上記のとおり Iceberg Java 1.10.0+ は `format-version=4` を受け付けます。**仕様が採択前に変更されれば、作ってしまった v4 テーブルが読めなくなりかねません。** 明示的に避ける判断が必要です。
 
 ただし、v4 の方向性は業界動向として重要です。**Databricks が Delta 5.0 に Iceberg v4 の adaptive metadata tree 構造を採用する提案を公式ブログで出しています** → [07-ecosystem.md](07-ecosystem.md)。
 
@@ -422,7 +422,7 @@ static final int MIN_FORMAT_VERSION_OPTIONAL_LOCATION = 4;   // ← v4 機能（
 
 3. **row lineage は v3 で必須かつ後付け不可。** アップグレード前のスナップショットには row ID が無く `_row_id` は null。**CDC 目的なら、equality delete を使うエンジン（Flink upsert 等）では追跡されない**点が最大の制約です。
 
-4. **v4 は仕様未採択だが、Java 実装は受理する。** 公式マイルストーンは2提案のみ。**Iceberg Java 1.10.0+ で `format-version=4` は設定でき、PyIceberg では設定できません。**「未採択」と「設定不可」を混同しないこと。v4 前提の計画は時期尚早ですが、理由は「作れない」ではなく「**仕様が変わりうる**」です。
+4. **v4 は仕様未採択だが、Java 実装は受け付ける。** 公式マイルストーンは2提案のみ。**Iceberg Java 1.10.0+ で `format-version=4` は設定でき、PyIceberg では設定できません。**「未採択」と「設定不可」を取り違えないこと。v4 前提の計画は時期尚早ですが、理由は「作れない」ではなく「**仕様が変わりうる**」です。
 
 5. **File System Tables（HDFS の atomic rename 方式）は使わない。** 仕様が deprecated + 「オブジェクトストアとローカルファイルシステムでは **unsafe**」+ v4 で削除予定と宣言しています。
 

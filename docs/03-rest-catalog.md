@@ -108,7 +108,7 @@ info:
 | `/v1/{prefix}/namespaces/{namespace}/functions` | GET | `listFunctions` |
 | `/v1/{prefix}/namespaces/{namespace}/functions/{function}` | GET | `loadFunction` |
 
-1.11.0 で「Introduce SQL UDF specification」（PR #14117）が入り `site/docs/udf-spec.md` が存在します。**両者を結びつける明示的な公式記述は未確認**ですが、対応するものと考えられます。
+1.11.0 で「Introduce SQL UDF specification」（PR #14117）が入り、`site/docs/udf-spec.md` が存在します。**両者を結びつける明示的な公式記述は未確認**ですが、対応するものと考えられます。
 
 ### Transaction
 
@@ -348,7 +348,7 @@ schema:
 example: "vended-credentials,remote-signing"
 ```
 
-**これはシグナルであって要求ではありません。** 「The server may choose to supply access via **any or none** of the requested mechanisms」— サーバは要求されたメカニズムのいずれか、あるいは**どれも提供しない**自由があります。したがってクライアントは、ヘッダを送っても credential が返ってこないケースを常にハンドルする必要があります。
+**これはシグナルであって要求ではありません。** 「The server may choose to supply access via **any or none** of the requested mechanisms」— サーバは要求されたメカニズムのいずれかを提供することも、**どれも提供しない**ことも選べます。そのためクライアントは、ヘッダを送っても credential が返ってこないケースを常に想定しておく必要があります。
 
 ### `LoadTableResult` の規約
 
@@ -625,7 +625,7 @@ POST /plan
 >   - `client`: Clients **MUST** use client-side scan planning
 >   - `server`: Clients **MUST** use server-side scan planning via the `planTableScan` endpoint
 
-**これは強い規定です。** `server` を返すカタログに対しては、クライアントは manifest を自分で読むことを**許されません**。これにより、管理型カタログがガバナンス（行/列レベルセキュリティ、監査）をスキャンプランニングに埋め込み、**クライアントがメタデータを直接読むことを禁止する**ユースケースが成立します。
+**これは強い規定です。** `server` を返すカタログに対しては、クライアントは manifest を自分で読むことを**許されません**。この規定があってはじめて、管理型カタログがガバナンス（行/列レベルセキュリティ、監査）をスキャンプランニングに埋め込み、**クライアントによるメタデータの直接読み取りを禁止する**ユースケースが成立します。
 
 ### エコシステムの実装状況
 

@@ -29,7 +29,7 @@ Apache Iceberg と Iceberg REST Catalog について、**一次情報の裏取�
 
 ### 仕様
 
-- **v4 は仕様として未採択ですが、Java 実装は既に受理します。** ここは混同されやすい上に、混同すると判断を誤ります。仕様本文は「Version 4 is under active development and **has not been formally adopted**」と明記していますが、**Iceberg Java は 1.10.0（2025-09-11）以降 `format-version=4` を設定できます**（`SUPPORTED_TABLE_FORMAT_VERSION = 4`）。**PyIceberg 0.11.1 は受理しません**（`TableVersion = Literal[1, 2, 3]`）。既定値はいずれも 2。→ [02](docs/02-table-spec.md#v4-metadata-structure-and-representation--未採択ただし実装は先行している)
+- **v4 は仕様として未採択ですが、Java 実装ではすでに v4 テーブルを作れます。** ここは取り違えやすく、取り違えると判断を誤ります。仕様本文は「Version 4 is under active development and **has not been formally adopted**」と明記していますが、**Iceberg Java は 1.10.0（2025-09-11）以降 `format-version=4` を設定できます**（`SUPPORTED_TABLE_FORMAT_VERSION = 4`）。一方 **PyIceberg 0.11.1 は受け付けません**（`TableVersion = Literal[1, 2, 3]`）。既定値はいずれも 2。→ [02](docs/02-table-spec.md#v4-metadata-structure-and-representation--未採択ただし実装は先行している)
 
 - **デフォルトは今も v2 + copy-on-write。** `format-version` の既定値は 2、`write.{delete,update,merge}.mode` の既定値は `copy-on-write` です。v3 の恩恵（deletion vector 等）は明示的なオプトインなしには得られません。→ [02](docs/02-table-spec.md)
 
@@ -59,7 +59,9 @@ Apache Iceberg と Iceberg REST Catalog について、**一次情報の裏取�
 
 ## 本報告書の証跡方針
 
-この報告書は複数の調査エージェントによる並列調査をもとに構成し、**エージェント間で食い違った主張は専任の検証を行って一次情報で決着させています**。方針は以下の通りです。
+> **この報告書は人間と AI の共同作業で作成しています。** 調査・執筆・検証を人間と AI が分担しており、**人間が書いた部分と AI が書いた部分が混在しています。** 正確性を高めるため一次情報での裏取りと公開前のファクトチェックを行い、その過程で見つかった誤りは修正しましたが（[fact-check-report.md](fact-check-report.md) に記録）、**すべての主張を検証したわけではなく、誤りが残っている可能性があります。** 重要な判断に使う数値・バージョン・仕様の記述は、引用元の一次情報で再確認してください。
+
+誤りを減らすため、**同じ問いを複数回・独立に調べ、結果が食い違った点は改めて一次情報に当たって決着させています**。方針は以下の通りです。
 
 1. **一次情報を直接取得して確認する。** 記憶や推測でバージョン番号・プロパティ名・API シグネチャを書きません。
 2. **優先順位を固定する。** 公式ドキュメント > リポジトリの実ファイル/ソースコード > 公式ブログ・プレスリリース > 技術ブログ。矛盾したら上位を採用し、**矛盾の存在自体を記録します**。
@@ -97,4 +99,4 @@ Apache Iceberg と Iceberg REST Catalog について、**一次情報の裏取�
 
 ## ライセンス
 
-本報告書は [CC BY 4.0](LICENSE) で提供します。引用元の各プロジェクト・製品のドキュメントの権利は、それぞれの権利者に帰属します。
+本報告書は [CC BY 4.0](LICENSE) のもとで公開します。引用元の各プロジェクト・製品のドキュメントの権利は、それぞれの権利者に帰属します。

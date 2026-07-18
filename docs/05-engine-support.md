@@ -4,7 +4,7 @@
 
 ## 読み方（重要）
 
-本ドキュメントは判定を**3値**で区別します。この区別が本ドキュメントの価値の中心です。
+本ドキュメントは判定を**3値**で区別します。この区別こそが本調査の価値の中心です。
 
 | 記号 | 意味 |
 |---|---|
@@ -42,7 +42,7 @@
 
 ## ベンダー3社の v3 対応 — 食い違いを一次情報で決着
 
-先行調査でエージェント間の主張が食い違ったため、専任で検証しました。**結果として、食い違いの大半は「時系列の異なる時点を切り取った」ことによるもの**でした。
+先行の調査結果の間で主張が食い違ったため、改めて一次情報で検証しました。**結果として、食い違いの大半は「時系列の異なる時点を切り取った」ことによるもの**でした。
 
 ### Databricks — 【確定】**GA**
 
@@ -81,7 +81,7 @@
 現行 docs（最終根拠）:
 > You can **read and write** to Snowflake-managed Iceberg **v2 and v3** tables from external engines through the Horizon Iceberg REST Catalog API
 
-> **教訓**: **Snowflake のリリースノートを現況の根拠に使わないこと。** 仕様上、後から更新されず、点時記述が残り続けます。→ [99-methodology.md](99-methodology.md)
+> **教訓**: **Snowflake のリリースノートを現況の根拠に使わないこと。** 仕様上、後から更新されることはなく、その時点の記述がそのまま残り続けます。→ [99-methodology.md](99-methodology.md)
 
 **IRC**: サーバ（Horizon Catalog、`https://<account>.snowflakecomputing.com/polaris/api/catalog`）とクライアントの**両方向 GA**。ただしサーバ側が公開するのは **Snowflake-managed Iceberg テーブルのみ**です。
 
@@ -91,7 +91,7 @@
 
 ### Dremio — 【確定】**Preview**
 
-**ここだけ本当の誤りがありました。** プレスリリースの表現を採ったエージェントが、docs と突き合わせていませんでした。
+**ここだけ本当の誤りがありました。** プレスリリースの表現を採った調査結果が、docs と突き合わせられていませんでした。
 
 | ソース | 主張 |
 |---|---|
@@ -147,7 +147,7 @@
   ```
 - 1.10.0 に「Throw unsupported exception for ADD COLUMN with default value (#13464)」
 
-→ **リリースノートの文言だけ読むと誤読します。DDL での default 設定は依然不可です。**
+→ **リリースノートの文言だけを読むと誤読を招きます。DDL での default 設定は依然として不可です。**
 
 ### 罠2: geometry/geography はマージ済みだが使えない
 

@@ -15,7 +15,7 @@
 | **Recommended Maintenance** | **Expire Snapshots** / **Remove old metadata files** / **Delete orphan files** |
 | **Optional Maintenance** | **Compact data files** / **Rewrite manifests** |
 
-**公式は compaction を「オプション」、スナップショット期限切れと metadata 掃除を「推奨（必須級）」に置いています。**
+**公式は compaction を「オプション」、スナップショット期限切れと metadata 掃除を「推奨（必須級）」に位置づけています。**
 
 そしてこの因果関係が決定的です（`maintenance.md` の `!!! info`）:
 
@@ -98,7 +98,7 @@
 
 **放置時**: 「スナップショットは expire されるまで蓄積し続ける」→ ストレージ課金の無限増加とメタデータサイズ増大。
 
-**この procedure は未期限のスナップショットが依然として必要とするファイルを決して削除しません。**
+**この procedure は、未期限のスナップショットがまだ必要としているファイルを削除することはありません。**
 
 | 引数 | 必須 | 型 | デフォルト |
 |---|---|---|---|
@@ -254,7 +254,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 
 **なぜ小ファイルが生まれるのか（仕様上の根拠）**:
 
-`spark-writes.md` が明記する通り「**ファイルは Iceberg のパーティション境界をまたげない**（a file cannot span an Iceberg partition boundary）」— これが over-partitioning が**必ず**小ファイルを生む理由です。パーティションを細かくすると、各パーティションのデータ量が 512MB を大きく下回り、パーティション境界がファイル境界を強制します。
+`spark-writes.md` が明記する通り「**ファイルは Iceberg のパーティション境界をまたげない**（a file cannot span an Iceberg partition boundary）」— これが over-partitioning が**必ず**小ファイルを生む理由です。パーティションを細かくすると、各パーティションのデータ量が 512MB を大きく下回り、パーティション境界がそのままファイル境界になります。
 
 さらに `write.distribution-mode=hash`（Spark 既定）ではパーティション値でハッシュ分散されるため、パーティション数が多いほどタスクあたりのデータが薄くなり、**1パーティション×1タスクごとに小ファイルが1つ**生まれます。
 
@@ -318,7 +318,7 @@ Iceberg の書き込みは「先にデータファイルを書く → 最後に�
 
 `performance.md` の設計目標は「**マルチペタバイトのテーブルでも、テーブルメタデータをふるいにかける分散 SQL エンジンを必要とせず、単一ノードから読める**」です。
 
-しかしこの前提は**メタデータが単一ノードのメモリ・I/O 帯域に収まる限り**において成立します。スナップショットが expire されず manifest が肥大すると前提が崩れ、Spark driver が全 manifest を読む際のボトルネック（および OOM）になります。
+しかしこの前提は**メタデータが単一ノードのメモリ・I/O 帯域に収まる限り**で成立します。スナップショットが expire されず manifest が肥大すると前提が崩れ、Spark driver が全 manifest を読む際のボトルネック（および OOM）になります。
 
 **`expire_snapshots` / `remove_orphan_files` の `stream_results` オプションが「Spark driver の OOM を防ぐため true 推奨」と明記されているのは、この問題が実在することの公式な証左です。**
 
