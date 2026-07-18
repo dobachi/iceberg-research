@@ -93,7 +93,7 @@ Apache Iceberg と Iceberg REST Catalog について、**一次情報の裏取�
 
 - **調査基準日時点のスナップショットです。** Iceberg 周辺は変化が速く、特にベンダーの対応状況は数ヶ月で変わります。バージョン番号や GA/Preview の別を引用する際は再確認してください。
 - **実機検証は上記の範囲に限られます。** それ以外はドキュメントとソースコードの読解に基づきます。特に **Spark / Flink / Trino / Snowflake / Databricks / Dremio の対応状況は未検証**で、各社のドキュメントの読解に依拠しています。
-- **未確認事項が残っています。** 隠さず [99-methodology.md](docs/99-methodology.md#d-未確認事項の一覧) に一覧化しています。
+- **未確認事項が残っています。** [99-methodology.md](docs/99-methodology.md#d-未確認事項の一覧) に一覧化しています。
 
 ---
 
