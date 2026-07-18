@@ -253,7 +253,7 @@ quickstart が4サービス・外部DB不要・完全自動ブートストラッ
 
 *対抗*: Rust 単一バイナリの軽さと vending の充実を重視するなら Lakekeeper。Git-like ブランチが主目的なら Nessie の in_memory 1サービス。
 
-> 本リポジトリのサンプル実装（[`iceberg-rest-lab`](../../iceberg-rest-lab)）もこの構成を採用しています。
+> 本報告書の検証環境もこの構成を採用しています。
 
 ### シナリオB: 本番マルチテナント → **Apache Polaris**
 

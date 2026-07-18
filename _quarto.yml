@@ -1,0 +1,80 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - index.md
+    - docs/*.md
+    - fact-check-report.md
+
+website:
+  title: "Apache Iceberg 調査報告書"
+  description: "Apache Iceberg と Iceberg REST Catalog について、一次情報の裏取りを前提にまとめた技術調査報告書"
+  site-url: https://dobachi.github.io/iceberg-research/
+  repo-url: https://github.com/dobachi/iceberg-research
+  repo-actions: [source, issue]
+  page-navigation: true
+  reader-mode: true
+
+  navbar:
+    background: primary
+    search: true
+    right:
+      - icon: github
+        href: https://github.com/dobachi/iceberg-research
+        aria-label: GitHub
+
+  sidebar:
+    style: docked
+    search: true
+    collapse-level: 2
+    contents:
+      - text: "はじめに"
+        href: index.md
+      - section: "本編"
+        contents:
+          - text: "01 アーキテクチャと中核概念"
+            href: docs/01-architecture.md
+          - text: "02 テーブル仕様 v1/v2/v3（と v4）"
+            href: docs/02-table-spec.md
+          - text: "03 REST Catalog 仕様"
+            href: docs/03-rest-catalog.md
+          - text: "04 カタログ実装の比較"
+            href: docs/04-catalog-implementations.md
+          - text: "05 エンジン対応状況"
+            href: docs/05-engine-support.md
+          - text: "06 運用・メンテナンス・性能"
+            href: docs/06-operations.md
+          - text: "07 エコシステムと業界動向"
+            href: docs/07-ecosystem.md
+          - text: "08 選定ガイド"
+            href: docs/08-decision-guide.md
+      - section: "付録"
+        contents:
+          - text: "99 調査方法論と未確認事項"
+            href: docs/99-methodology.md
+          - text: "ファクトチェック報告書"
+            href: fact-check-report.md
+
+  page-footer:
+    left: "CC BY 4.0 / 調査基準日 2026-07-17"
+    right:
+      - text: "GitHub"
+        href: https://github.com/dobachi/iceberg-research
+
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    toc: true
+    toc-depth: 3
+    toc-title: "このページの目次"
+    code-copy: true
+    code-overflow: wrap
+    link-external-newwindow: true
+    link-external-icon: false
+    anchor-sections: true
+    smooth-scroll: true
+    lang: ja
+    mermaid:
+      theme: neutral
