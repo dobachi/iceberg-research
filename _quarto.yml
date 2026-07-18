@@ -50,6 +50,8 @@ website:
             href: docs/08-decision-guide.md
       - section: "付録"
         contents:
+          - text: "90 用語集"
+            href: docs/90-glossary.md
           - text: "99 調査方法論と未確認事項"
             href: docs/99-methodology.md
           - text: "ファクトチェック報告書"

@@ -52,18 +52,18 @@ IRC の API は、大きく **リソース階層（namespace の中に table と
 
 ```mermaid
 flowchart TD
-    C["GET /v1/config を最初に叩く<br/>（設定・対応機能を受け取る）"] --> NS["Namespace<br/>テーブル/view の入れ物"]
+    C["GET /v1/config<br/>を最初に叩く<br/>設定・対応機能を取得"] --> NS["Namespace<br/>テーブル/view の入れ物"]
     NS --> T["Table"]
     NS --> V["View"]
     T --> W["updateTable（コミット）<br/>＝唯一の書き込み経路"]
-    subgraph CRUD["namespace / table / view は同じ形"]
-      O["list・create・load・update・drop・exists"]
+    subgraph CRUD["3者は同じ形"]
+      O["list / create / load<br/>update / drop / exists"]
     end
-    subgraph X["横断的な操作群（どのリソースにも効く）"]
-      AU["認証：OAuth2 / Bearer / SigV4"]
-      TX["Transaction：複数テーブルを一括コミット"]
-      SP["Scan Planning：読むファイルの計画"]
-      CR["Credentials / Sign：短命の認証情報を払い出す"]
+    subgraph X["横断的な操作群"]
+      AU["認証<br/>OAuth2 / Bearer<br/>SigV4"]
+      TX["Transaction<br/>複数テーブルを<br/>一括コミット"]
+      SP["Scan Planning<br/>読むファイルの計画"]
+      CR["Credentials / Sign<br/>短命の認証情報"]
     end
 ```
 

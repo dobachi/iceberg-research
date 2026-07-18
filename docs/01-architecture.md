@@ -187,10 +187,10 @@ manifest list の各エントリは `field_summary`（`contains_null` / `contain
 
 ```mermaid
 flowchart TD
-    N0["テーブル全体　≈ 数千ファイル"]
-    N1["12月の manifest が指すファイルのみ"]
-    N2["12月パーティションのファイル"]
-    N3["実際に開く　≈ 十数ファイル"]
+    N0["テーブル全体<br/>≈ 数千ファイル"]
+    N1["12月の manifest が<br/>指すファイル"]
+    N2["12月パーティション<br/>のファイル"]
+    N3["実際に開く<br/>≈ 十数ファイル"]
     N0 -->|"段1: manifest list の ts 範囲で<br/>1〜11月の manifest を丸ごとスキップ"| N1
     N1 -->|"段2: ts≥12/1 → ts_day≥day(12/1) で<br/>12月より前のパーティションを除外"| N2
     N2 -->|"段3: region 列の bound で<br/>asia を含まないファイルを除外"| N3
