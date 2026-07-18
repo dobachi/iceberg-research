@@ -70,7 +70,7 @@
 
 **PyIceberg** の `py.iceberg.apache.org` には**バージョンセレクタ/バナーがなく**、どのバージョンに対応するか明示されません（＝ `main` 追従の可能性）。
 
-そこで本調査は**リリースタグ `pyiceberg-0.11.1` のソースを直接取得して照合**しました。その結果、docs だけでは分からない精度で確定できました:
+そこで本調査は**リリースタグ `pyiceberg-0.11.1` のソースを直接参照して照合**しました。その結果、docs だけでは分からない精度で確定できました:
 - `table.maintenance` の実在（`table/__init__.py` L1129、`table/maintenance.py`）
 - **v3 は「型定義は存在するが `model_dump_json` が `NotImplementedError` を投げる＝書き込み不可」**
 

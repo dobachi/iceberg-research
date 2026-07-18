@@ -2,7 +2,7 @@
 
 **調査基準日: 2026-07-17** / **一次情報: [`open-api/rest-catalog-open-api.yaml`](https://github.com/apache/iceberg/blob/main/open-api/rest-catalog-open-api.yaml)（main、5822行を精査）**
 
-> **取得方法の注記**: `https://iceberg.apache.org/rest-catalog-spec/` は Swagger UI によるクライアントサイド描画のため、HTTP フェッチでは仕様本文が取得できません。本ドキュメントは同ページが読み込む大元の YAML を直接取得して精査した結果に基づきます。
+> **出典の注記**: `https://iceberg.apache.org/rest-catalog-spec/` は Swagger UI がクライアント側で描画する方式のため、仕様本文をそのまま取り込めません。そこで本ドキュメントは、同ページが読み込む大元の YAML を出典としています。
 
 ---
 
