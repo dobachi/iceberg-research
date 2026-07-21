@@ -215,8 +215,8 @@ pyiceberg.exceptions.CommitStateUnknownException:
 
 ```
 XTable: 最新リリース 2025-06-04（13ヶ月前）、直近90日 10 コミット、2年5ヶ月 incubating のまま
-Iceberg: 直近365日 1,680 コミット、contributor 267名
-Paimon: 直近365日 2,271 コミット（Iceberg の1.35倍）
+Iceberg: 直近365日 1,696 コミット（うち人間 1,387）、ユニーク作者 270名
+Paimon: 直近365日 2,278 コミット（うち人間 2,265、人間コミットで Iceberg の1.63倍）
 ```
 
 「XTable は停滞している」「Paimon は Iceberg に吸収されていない」といった判断は、**この実測値が支持します**。

@@ -43,7 +43,7 @@ flowchart TD
 | Flink 中心 | Iceberg の Flink 連携は INSERT/UPSERT のみで MERGE/UPDATE/DELETE の SQL が無い。Paimon は Flink Table Store 由来 | [C-5](07-ecosystem.md#c-5-flink-中心のストリーミング特化) |
 | 単一プラットフォーム | Iceberg の存在理由はエンジン非依存の共有。1つで完結するならネイティブ形式の最適化を享受できる | [C-4](07-ecosystem.md#c-4-単一エンジンしか使わない) |
 | Azure / Fabric | OneLake のネイティブは Delta。Iceberg は仮想化経由で V3 互換は未完了 | [C-6](07-ecosystem.md#c-6-azurefabric-中心の環境) |
-| AI/ML の非構造データ | Iceberg 1.11.0 に VECTOR/BLOB 相当の型は確認できず。Hudi 1.2.0 が対応 | [C-7](07-ecosystem.md#c-7-aiml-の非構造データを同居させたい) |
+| AI/ML の非構造データ | Iceberg 1.11.0 に VECTOR/BLOB 相当の型は確認できず（**機能詳細は未検証**）。Hudi 1.2.0 が対応 | [C-7](07-ecosystem.md#c-7-aiml-の非構造データを同居させたい) |
 
 > **後戻りは以前より容易です。** UniForm（Delta→Iceberg）、Paimon の Iceberg 互換メタデータ、OneLake のメタデータ仮想化により、「主要ワークロードに最適な形式で書き、他形式は公開で賄う」が現実的になっています。ただしこの相互運用は**ベンダー実装が担っており、ベンダー中立の XTable は停滞している**点は認識しておくべきです（[A-4](07-ecosystem.md#a-4-相互運用--xtable-は実測で停滞)）。
 

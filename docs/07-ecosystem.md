@@ -106,7 +106,7 @@
 ベンダー中立の相互運用を担う唯一のプロジェクトである XTable の実測値:
 
 - 最新リリース **0.3.0-incubating = 2025-06-04**（**13ヶ月以上リリースなし**）
-- コミット: 直近90日 **10件** / 365日 **41件** / 2024-07-17 以降の2年間で 148件 → **明確な減速カーブ**
+- コミット: 直近90日 **10件** / 365日 **42件** / 2024-07-17 以降の2年間で 148件 → **明確な減速カーブ**
 - Incubation 入りは **2024-02-11**、**2026年7月時点でまだ incubating**（約2年5ヶ月）
 - 直近コミットは Onehouse 関係者と dependabot が大きな比率
 
@@ -141,7 +141,7 @@
 - Snowflake と Dremio が共同作成し **2024年8月 ASF へ寄贈**
 - **TLP 卒業**（2026-02-19 公式アナウンス）。**卒業投票は +1 が27票、反対0**
 - PMC に Dremio, Snowflake, Google, Microsoft, Confluent, LanceDB のエンジニアが参加（**ASF 公式名簿での照合は未実施**）
-- 健全: 1.6.0（2026-07-09）、過去365日で 2,084 コミット
+- 健全: 1.6.0（2026-07-09）、過去365日で 2,100 コミット（うち 35% はボット、人間 1,356 → [A-2](#a-2-健全性シグナル2026-07-17-実測)）
 
 #### 各クラウド
 
@@ -174,7 +174,7 @@ Confluent Tableflow、Fivetran Managed Data Lake Service（**既定で Apache Po
 
     → **「Iceberg 対応」は「Iceberg 仕様のフルサポート」を意味しません。** ただし個別の制限事項の現時点での正確性は**未確認**（docs は頻繁に更新されるため）。
 
-5. **Paimon が最速で開発されています**（コミット 2,271/年、Iceberg の 1.35倍）。Iceberg に吸収される兆候はありません。
+5. **Paimon が最速で開発されています**（人間コミット 2,265/年、Iceberg の 1.63倍。生では 1.34倍だが Iceberg は 18% が dependabot → [A-2](#a-2-健全性シグナル2026-07-17-実測)）。Iceberg に吸収される兆候はありません。
 
 6. **Hudi は AI/ML 領域へ差別化**（VECTOR/BLOB 型、Lance 統合）。Iceberg にない機能軸です。
 
@@ -200,7 +200,7 @@ Confluent Tableflow、Fivetran Managed Data Lake Service（**既定で Apache Po
 
 #### (b) しかし「単一の実装フォーマット」としては勝っていない
 
-Fabric のネイティブは Delta、Confluent と Fivetran は両対応、Paimon は Iceberg の1.35倍の開発速度、DuckLake が2026年に v1.0 到達。
+Fabric のネイティブは Delta、Confluent と Fivetran は両対応、Paimon は Iceberg の1.63倍（人間コミット換算）の開発速度、DuckLake が2026年に v1.0 到達。
 
 #### (c) 最も重要な事実は「統合」の方向
 

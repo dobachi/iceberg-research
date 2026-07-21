@@ -516,7 +516,7 @@ defaults  →  クライアント設定  →  overrides     （後勝ち）
 
 形式は `"<HTTP verb> <resource path>"`（空白1つで区切る）。
 
-**省略時に仮定されるデフォルトセット（13個）**:
+**省略時に仮定されるデフォルトセット（14個）**:
 
 ```
 GET    /v1/{prefix}/namespaces

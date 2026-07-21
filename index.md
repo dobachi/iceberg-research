@@ -73,7 +73,7 @@ Apache Iceberg と Iceberg REST Catalog について、**一次情報の裏取�
 
 ### エコシステム
 
-- **「Iceberg がデファクト標準になった」は不正確です。** カタログの相互接続層としては REST Catalog 仕様が共通語になりつつある一方、フォーマット単体では決着していません（Fabric のネイティブは Delta、Confluent/Fivetran は両対応、Paimon の開発速度は Iceberg の1.35倍、DuckLake v1.0 が2026年4月に登場）。→ [07](docs/07-ecosystem.md#b-iceberg-は事実上の標準になったのか)
+- **「Iceberg がデファクト標準になった」は不正確です。** カタログの相互接続層としては REST Catalog 仕様が共通語になりつつある一方、フォーマット単体では決着していません（Fabric のネイティブは Delta、Confluent/Fivetran は両対応、Paimon の開発速度は Iceberg の1.63倍〔人間コミット換算〕、DuckLake v1.0 が2026年4月に登場）。→ [07](docs/07-ecosystem.md#b-iceberg-は事実上の標準になったのか)
 
 - **Databricks が Delta 5.0 に Iceberg v4 のメタデータ構造を採用する提案を出しています。** 実現すれば「勝敗」ではなく統合になります。ただし Delta 5.0 も Iceberg v4 も未リリースです。→ [07](docs/07-ecosystem.md)
 
