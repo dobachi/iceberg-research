@@ -50,9 +50,18 @@ jobs:
             tlmgr install "$pkg" || echo "skip: $pkg"
           done
 
-      # mermaid を PDF 用の画像に落とすのに使う。GitHub のランナーには同梱されている
-      - name: Check Chrome
-        run: google-chrome --version
+      # mermaid を画像に落とすのに Chrome を使う。Quarto は Chrome のデバッグポートの
+      # 待受を 3 秒しか待たず、間に合わないと「終了しないプロセスの終了」を待って
+      # 永久にハングする（ランナー同梱の Chrome で実際に再現した）。起動の軽い
+      # chrome-headless-shell を使って余裕を持たせる。
+      - name: Install chrome-headless-shell
+        run: |
+          npx --yes @puppeteer/browsers install chrome-headless-shell@stable \
+            --path "$HOME/.cache/puppeteer"
+          CHS=$(find "$HOME/.cache/puppeteer" -type f -name chrome-headless-shell | head -1)
+          test -n "$CHS"
+          "$CHS" --version
+          echo "QUARTO_CHROMIUM=$CHS" >> "$GITHUB_ENV"
 
       - name: Render site
         run: quarto render
