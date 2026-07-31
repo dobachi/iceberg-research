@@ -1,0 +1,71 @@
+# PDF（一冊もの）を組むための Quarto プロジェクト設定。
+#
+# サイト本体は website 型で、website は複数ページを1つの PDF にまとめられない。
+# そこで scripts/build-pdf.sh が本文を .pdf-build/ にコピーし、このファイルを
+# .pdf-build/_quarto.yml として置いて book 型でレンダリングする。
+# 章立ては _quarto.yml のサイドバーと同じ順序に揃えること。
+project:
+  type: book
+  output-dir: _pdf
+
+book:
+  title: "Apache Iceberg 調査報告書"
+  subtitle: "Apache Iceberg と Iceberg REST Catalog について、一次情報の裏取りを前提にまとめた技術調査"
+  author: "dobachi"
+  date: "2026-07-18"
+  output-file: "iceberg-research"
+
+  chapters:
+    - index.qmd
+    - docs/01-architecture.qmd
+    - docs/02-table-spec.qmd
+    - docs/03-rest-catalog.qmd
+    - docs/04-catalog-implementations.qmd
+    - docs/05-engine-support.qmd
+    - docs/06-operations.qmd
+    - docs/07-ecosystem.qmd
+    - docs/08-decision-guide.qmd
+
+  appendices:
+    - docs/90-glossary.qmd
+    - docs/99-methodology.qmd
+    - fact-check-report.qmd
+
+# 日本語は lualatex + luatexja で組む。フォントは Noto CJK に固定してあるので、
+# CI 側で fonts-noto-cjk を入れておくこと（.github/workflows/publish.yml）。
+format:
+  pdf:
+    documentclass: scrreprt
+    classoption: [11pt]
+    pdf-engine: lualatex
+    lang: ja
+    mainfont: "Noto Serif CJK JP"
+    sansfont: "Noto Sans CJK JP"
+    monofont: "Noto Sans Mono CJK JP"
+    CJKmainfont: "Noto Serif CJK JP"
+    CJKsansfont: "Noto Sans CJK JP"
+    CJKmonofont: "Noto Sans Mono CJK JP"
+    CJKoptions:
+      - BoldFont=Noto Sans CJK JP Bold
+    geometry:
+      - top=25mm
+      - bottom=25mm
+      - left=22mm
+      - right=22mm
+    toc: true
+    toc-depth: 3
+    toc-title: 目次
+    number-sections: true
+    colorlinks: true
+    code-overflow: wrap
+    fig-align: center
+    fig-pos: "htbp"
+    include-in-header:
+      text: |
+        % 図が本文幅・ページ高さを超えないよう、全ての画像に上限を付ける。
+        % Quarto は mermaid 図に実寸（例 width=11.81in）を指定してくるので、
+        % \setkeys{Gin} の既定値では効かず、\includegraphics 自体を包む必要がある。
+        \usepackage[export]{adjustbox}
+        \let\origincludegraphics\includegraphics
+        \renewcommand{\includegraphics}[2][]{%
+          \origincludegraphics[#1,max width=\linewidth,max totalheight=0.85\textheight,keepaspectratio]{#2}}

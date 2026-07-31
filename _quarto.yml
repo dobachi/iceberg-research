@@ -19,6 +19,11 @@ website:
     background: primary
     search: true
     right:
+      # PDF は scripts/build-pdf.sh が _site/ に置く（Quarto の入力ファイルではないので
+      # 相対パスだと下層ページで壊れる。サイトルート起点の絶対パスで指す）
+      - text: "PDF"
+        icon: file-earmark-pdf
+        href: /iceberg-research.pdf
       - text: "実験ラボ"
         href: https://dobachi.github.io/iceberg-rest-lab/
       - icon: github

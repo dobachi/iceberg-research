@@ -9,3 +9,6 @@
 # Quarto build output
 _site/
 .quarto/
+
+# PDF ビルド用の一時ディレクトリ（scripts/build-pdf.sh）
+.pdf-build/

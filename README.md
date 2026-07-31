@@ -1,6 +1,7 @@
 # Apache Iceberg 調査報告書
 
 **公開サイト: https://dobachi.github.io/iceberg-research/**
+**PDF 版: https://dobachi.github.io/iceberg-research/iceberg-research.pdf**（全文を1冊にまとめたもの）
 
 
 > **この文書の位置づけ**
@@ -117,6 +118,30 @@ Apache Iceberg と Iceberg REST Catalog について、**一次情報の裏取�
 - **未確認事項が残っています。** [99-methodology.md](docs/99-methodology.md#d-未確認事項の一覧) に一覧化しています。
 
 ---
+
+## ビルド
+
+```bash
+quarto render            # _site/ へ HTML サイトを出力
+bash scripts/build-pdf.sh # _site/ に PDF（1冊もの）を追加
+```
+
+`quarto render` は `_site/` を作り直すので、**PDF は必ずそのあとに生成する**。
+
+PDF 側の事情:
+
+- website 型のプロジェクトは複数ページを1つの PDF にまとめられないため、
+  `scripts/build-pdf.sh` が本文を `.pdf-build/` にコピーし、
+  `scripts/quarto-pdf.yml`（book 型）で組み直している。章立てを増減したら
+  こちらの `chapters:` も直すこと。
+- コピー側で、`.md` → `.qmd` への改名（実行セルを使うため）と、
+  HTML でクライアント描画している ` ```mermaid ` の実行セル化を行っている。
+  本文（`docs/*.md`）はそのままで、HTML の出力は変わらない。
+- 組版は lualatex + luatexja。日本語フォントに Noto CJK を名指ししているため、
+  ローカルで出すには TeX Live（luatexja を含む）と `fonts-noto-cjk`、
+  mermaid を画像に落とすための Chrome が要る。
+
+CI（`.github/workflows/publish.yml`）も同じ順序で実行している。
 
 ## ライセンス
 

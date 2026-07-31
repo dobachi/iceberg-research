@@ -1,5 +1,9 @@
 name: Publish to GitHub Pages
 
+# サイト（HTML）を組んだあと、同じ内容を1冊にまとめた PDF を _site/ に同梱して公開する。
+# PDF は lualatex + luatexja で組むので TeX（TinyTeX）と日本語フォント（Noto CJK）が要り、
+# 本文中の mermaid 図を画像に落とすのに Chrome を使う。
+
 on:
   push:
     branches: [main]
@@ -20,11 +24,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # scripts/quarto-pdf.yml で Noto CJK を名指ししているため、無いと PDF の日本語が消える
+      - name: Install Japanese fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          fc-cache -f
+
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          tinytex: true
+
+      # 足りないパッケージは Quarto が描画中に自動で入れるが、
+      # 主要なものを先に入れて再試行の回数を減らす（名前違いは無視して先へ進む）
+      - name: Install LaTeX packages
+        run: |
+          tlmgr update --self || true
+          for pkg in luatexja adjustbox koma-script fontspec unicode-math geometry \
+                     caption float booktabs framed fancyvrb microtype parskip xurl \
+                     bookmark footnotehyper mdwtools subcaption tcolorbox environ \
+                     trimspaces pdfcol fontawesome5 upquote; do
+            tlmgr install "$pkg" || echo "skip: $pkg"
+          done
+
+      # mermaid を PDF 用の画像に落とすのに使う。GitHub のランナーには同梱されている
+      - name: Check Chrome
+        run: google-chrome --version
 
       - name: Render site
         run: quarto render
+
+      # quarto render は _site/ を作り直すので、PDF は必ずそのあとに置く
+      - name: Build PDF
+        run: bash scripts/build-pdf.sh
 
       - uses: actions/configure-pages@v5
 

@@ -26,6 +26,10 @@ Apache Iceberg と Iceberg REST Catalog について、**一次情報の裏取�
 
 本報告書の主張の一部は、Apache Polaris と PyIceberg を用いた実環境で検証しています。検証環境と実験の記録は姉妹リポジトリ [**Iceberg REST Lab**](https://dobachi.github.io/iceberg-rest-lab/) に公開しています。
 
+::: {.content-visible when-format="html"}
+全文をまとめた [**PDF 版**](/iceberg-research.pdf) もあります（本編＋付録の一冊もの）。
+:::
+
 ---
 
 ## 目次
