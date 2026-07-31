@@ -21,6 +21,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # mermaid の描画で Chrome が返らずハングしたことがあるため上限を切る
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
