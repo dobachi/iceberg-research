@@ -1,7 +1,7 @@
 # Apache Iceberg 調査報告書
 
 **公開サイト: https://dobachi.github.io/iceberg-research/**
-**PDF 版: https://dobachi.github.io/iceberg-research/iceberg-research.pdf**（全文を1冊にまとめたもの）
+**PDF 版: https://dobachi.github.io/iceberg-research/iceberg-research-2026-07-21.pdf**（全文を1冊にまとめたもの）
 
 
 > **この文書の位置づけ**
@@ -142,6 +142,26 @@ PDF 側の事情:
   mermaid を画像に落とすための Chrome が要る。
 
 CI（`.github/workflows/publish.yml`）も同じ順序で実行している。
+
+### 版
+
+報告書には日付形式の版を付けている。リポジトリ直下の `VERSION` が正で、
+PDF のファイル名（`iceberg-research-<版>.pdf`）・表紙の日付・全ページのフッタ、
+それにサイトのフッタと PDF リンクがこの値から作られる。手元に落とした PDF が
+いつ時点のものか、ファイル名だけで分かるようにするため。
+
+版は「報告書を発行した日」で、調査基準日（2026-07-17）とは別物。
+
+版を上げるときは:
+
+```bash
+vi VERSION                 # 新しい日付（YYYY-MM-DD）に書き換える
+bash scripts/set-version.sh # _quarto.yml と scripts/quarto-pdf.yml へ反映する
+```
+
+反映を忘れたまま push すると、`scripts/build-pdf.sh` が冒頭で呼んでいる
+`scripts/set-version.sh --check` が CI を止める（ナビの PDF リンクだけ
+存在しないファイルを指す事故を防ぐため）。
 
 ## ライセンス
 

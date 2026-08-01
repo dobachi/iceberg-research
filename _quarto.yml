@@ -20,10 +20,11 @@ website:
     search: true
     right:
       # PDF は scripts/build-pdf.sh が _site/ に置く（Quarto の入力ファイルではないので
-      # 相対パスだと下層ページで壊れる。サイトルート起点の絶対パスで指す）
+      # 相対パスだと下層ページで壊れる。サイトルート起点の絶対パスで指す）。
+      # ファイル名の日付は版で、VERSION が正。scripts/set-version.sh で書き換えること。
       - text: "PDF"
         icon: file-earmark-pdf
-        href: /iceberg-research.pdf
+        href: /iceberg-research-2026-07-21.pdf
       - text: "実験ラボ"
         href: https://dobachi.github.io/iceberg-rest-lab/
       - icon: github
@@ -65,7 +66,7 @@ website:
             href: fact-check-report.md
 
   page-footer:
-    left: "CC BY 4.0 / Version: 2026-07-18（調査基準日 2026-07-17）"
+    left: "CC BY 4.0 / Version: 2026-07-21（調査基準日 2026-07-17）"
     right:
       - text: "GitHub"
         href: https://github.com/dobachi/iceberg-research

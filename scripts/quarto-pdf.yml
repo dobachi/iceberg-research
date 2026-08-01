@@ -12,8 +12,11 @@ book:
   title: "Apache Iceberg 調査報告書"
   subtitle: "Apache Iceberg と Iceberg REST Catalog について、一次情報の裏取りを前提にまとめた技術調査"
   author: "dobachi"
-  date: "2026-07-18"
-  output-file: "iceberg-research"
+  # 版（報告書を発行した日）。調査基準日 2026-07-17 とは別物。
+  # date / output-file / フッタの3箇所に版が入る。VERSION が正なので、
+  # 直接書き換えず scripts/set-version.sh で反映すること。
+  date: "2026-07-21"
+  output-file: "iceberg-research-2026-07-21"
 
   chapters:
     - index.qmd
@@ -69,3 +72,11 @@ format:
         \let\origincludegraphics\includegraphics
         \renewcommand{\includegraphics}[2][]{%
           \origincludegraphics[#1,max width=\linewidth,max totalheight=0.85\textheight,keepaspectratio]{#2}}
+
+        % 紙に刷ったり切り出したりしても版が分かるよう、全ページのフッタに版を出す。
+        % scrreprt は KOMA なので fancyhdr ではなく scrlayer-scrpage を使う。
+        % 星付き（\cfoot* など）は plain（章扉）にも同時に効く。
+        \usepackage{scrlayer-scrpage}
+        \clearpairofpagestyles
+        \cfoot*{\pagemark}
+        \ofoot*{\footnotesize Version 2026-07-21}

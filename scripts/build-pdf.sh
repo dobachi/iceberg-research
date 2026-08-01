@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# 報告書全体を1つの PDF に組んで _site/ に置く。
+# 報告書全体を1つの PDF に組んで _site/ に置く。ファイル名は
+# iceberg-research-<版>.pdf で、版は VERSION から来る（scripts/set-version.sh 参照）。
 #
 # サイト本体は website 型で、website は複数ページを1つの PDF にまとめられない。
 # そのため本文を .pdf-build/ にコピーし、book 型（scripts/quarto-pdf.yml）で組み直す。
@@ -12,6 +13,11 @@ cd "$(dirname "$0")/.."
 
 BUILD_DIR=.pdf-build
 SITE_DIR=_site
+
+# 版がずれていると、ナビの PDF リンクだけ存在しないファイルを指す（404 になる）。
+# レンダリングに時間をかける前に止める。
+scripts/set-version.sh --check
+VERSION="$(tr -d '[:space:]' <VERSION)"
 
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
@@ -47,7 +53,10 @@ find "$BUILD_DIR" -name '*.qmd' -print0 |
 quarto render "$BUILD_DIR" --to pdf
 
 mkdir -p "$SITE_DIR"
-cp "$BUILD_DIR/_pdf"/*.pdf "$SITE_DIR/"
+# 手元で版を上げながら組み直すと古い版が _site/ に残るので、置く前に掃除する
+# （CI は quarto render が _site/ を作り直すため、そちらでは元から残らない）。
+rm -f "$SITE_DIR"/iceberg-research-*.pdf
+cp "$BUILD_DIR/_pdf/iceberg-research-$VERSION.pdf" "$SITE_DIR/"
 
 echo "PDF を $SITE_DIR/ に配置した:"
 ls -la "$SITE_DIR"/*.pdf

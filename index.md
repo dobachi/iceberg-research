@@ -20,14 +20,14 @@
 
 Apache Iceberg と Iceberg REST Catalog について、**一次情報の裏取りを前提に**調べた記録です。仕様やエコシステムの現況を把握するための地図として書いています。
 
-**Version: 2026-07-18** / 調査基準日: 2026-07-17 / 対象: Apache Iceberg 1.11.0（2026-05-19 リリース）
+**Version: 2026-07-21** / 調査基準日: 2026-07-17 / 対象: Apache Iceberg 1.11.0（2026-05-19 リリース）
 
 > Version はこのページを更新した日付、調査基準日は内容を調べた時点です。Iceberg 周辺は変化が速いため、**調査基準日から離れるほど内容は古くなります**。
 
 本報告書の主張の一部は、Apache Polaris と PyIceberg を用いた実環境で検証しています。検証環境と実験の記録は姉妹リポジトリ [**Iceberg REST Lab**](https://dobachi.github.io/iceberg-rest-lab/) に公開しています。
 
 ::: {.content-visible when-format="html"}
-全文をまとめた [**PDF 版**](/iceberg-research.pdf) もあります（本編＋付録の一冊もの）。
+全文をまとめた [**PDF 版**](/iceberg-research-2026-07-21.pdf) もあります（本編＋付録の一冊もの）。
 :::
 
 ---
